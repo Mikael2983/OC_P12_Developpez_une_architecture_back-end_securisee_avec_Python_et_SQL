@@ -1,8 +1,114 @@
+from datetime import date
+
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from unittest.mock import patch
 
-from epic_event.models import Contract
+from epic_event.models import Contract, Client
+
+
+# ---------- String Representation ----------
+def test_contract_str():
+    client = Client(company_name="TestCorp")
+    contract = Contract(id=1, client=client)
+    assert str(contract) == "le contract 1 du client TestCorp"
+
+
+# ---------- Formatted Properties ----------
+def test_formatted_archived():
+    assert Contract(archived=True).formatted_archived == "OUI"
+    assert Contract(archived=False).formatted_archived == "NON"
+
+
+def test_formatted_signed():
+    assert Contract(signed=True).formatted_signed == "OUI"
+    assert Contract(signed=False).formatted_signed == "NON"
+
+
+def test_formatted_created_date():
+    contract = Contract(created_date=date(2024, 12, 31))
+    assert contract.formatted_created_date == "31-12-2024"
+
+
+# ---------- Static Display Fields ----------
+def test_get_field():
+    fields = Contract.get_field()
+    expected = ["id", "client_id", "total_amount", "amount_due",
+                "created_date", "signed", "archived"]
+    assert [f[0] for f in fields] == expected
+
+
+# ---------- Validation: Signed ----------
+def test_validate_signed_str():
+    for val in ["oui", "y", "yes", "true", "o"]:
+        assert Contract.validate_signed(val)[0] is True
+    assert Contract.validate_signed("non")[0] is False
+
+
+def test_validate_signed_bool():
+    assert Contract.validate_signed(True) == (True, None)
+    assert Contract.validate_signed(False) == (False, None)
+
+
+# ---------- Validation: Total Amount ----------
+def test_validate_total_amount_valid():
+    assert Contract.validate_total_amount("123.45") == ("123.45", None)
+
+
+def test_validate_total_amount_negative():
+    _, err = Contract.validate_total_amount("-100")
+    assert "positive" in err.lower()
+
+
+def test_validate_total_amount_invalid():
+    _, err = Contract.validate_total_amount("abc")
+    assert "numeric" in err.lower()
+
+
+# ---------- Validation: Amount Due ----------
+def test_validate_amount_due_valid():
+    assert Contract.validate_amount_due("1000", "500") == ("500", None)
+
+
+def test_validate_amount_due_exceeds():
+    _, err = Contract.validate_amount_due("100", "200")
+    assert "cannot exceed" in err.lower()
+
+
+def test_validate_amount_due_negative():
+    _, err = Contract.validate_amount_due("100", "-50")
+    assert "positive" in err.lower()
+
+
+def test_validate_amount_due_invalid():
+    _, err = Contract.validate_amount_due("abc", "xyz")
+    assert "numeric" in err.lower()
+
+
+# ---------- Validation: Client ID ----------
+def test_validate_client_id_valid(db_session, seed_data_client):
+    valid_id, err = Contract.validate_client_id(db_session,
+                                                seed_data_client.id)
+    assert valid_id == seed_data_client.id
+    assert err is None
+
+
+def test_validate_client_id_missing(db_session):
+    _, err = Contract.validate_client_id(db_session, None)
+    assert "missing" in err.lower()
+
+
+def test_validate_client_id_not_found(db_session):
+    _, err = Contract.validate_client_id(db_session, 99999)
+    assert "no client found" in err.lower()
+
+
+# ---------- Validation: Archived ----------
+def test_validate_archived():
+    for val in ["oui", "o", "yes", "true", "y"]:
+        assert Contract.validate_archived(val)[0] is True
+    for val in ["non", "n", "false"]:
+        assert Contract.validate_archived(val)[0] is False
 
 
 # ---------- Save Operation ----------
