@@ -49,26 +49,6 @@ Repository/
 ```
 
 ---
-## Setup
-### Prérequis
-Python must be installed beforehand.
-
-If you work in a Linux or MacOS environment: Python is normally already installed. To check, open your terminal and type:
-```bash
-python --version or python3 --version
-```
-If Python is not installed, you can download it at the following address: [Download Python3](https://www.python.org/downloads)
-
-You will also need the pip Python package installer which is included by default if you have a Python version >= 3.4. You can check that it is available through your command line, by entering: 
-```bash
-pip --version
-```
-You will also need Git to clone the application on your computer. Check your installation by typing
-```bash
-git --version Otherwise
-```
-choose and download the version of Git that corresponds to your installation: MacOS, Windows or Linux/Unix by clicking on the following link: [Download git](https://git-scm.com/downloads) Then run the file you just downloaded. Press Next at each window and then Install. During installation, leave all the default options as they work well. Git Bash is the interface for using Git on the command line.
-
 ### 1. Clone the Repository
 
 First, open the command prompt in the folder where you want to drop the clone.
@@ -113,7 +93,7 @@ EpicEvent already contains the necessary data for tests or demos.
 
 Depending on the server launch command, the corresponding data will be loaded.
 
-### 5. Start Server
+### 5. Start Cli application
 
 To see the data used for Pytest and Pexpect tests, 
 
@@ -132,14 +112,9 @@ For your own usage, enter following command to start the application:
 ```bash
 python main.py
 ```
-### 6. Start the Webapp
-
-To start the webapp on localhost, enter following URL in the web browser:
-
-http://127.0.0.1:8000/
 
 
-### 7. Connexion
+### 6. Connexion
 
 To log in to a SUPERUSER account,
 - with test database:
