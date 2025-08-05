@@ -7,10 +7,11 @@ SQLAlchemy.
 Manages authentication, dynamic menus by role, and operations on
 the entities.
 """
-from epic_event.controllers.entitycontroller import EntityController
-from epic_event.controllers.usercontroller import UserController
+from sqlalchemy.orm import Session
+
+from epic_event.controllers.entity_controller import EntityController
+from epic_event.controllers.user_controller import UserController
 from epic_event.models import Collaborator
-from epic_event.models.db_model import Session
 
 from epic_event.permission import permissions
 from epic_event.views.collaborator_view import CollaboratorView
@@ -19,7 +20,7 @@ from epic_event.views.event_view import EventView
 from epic_event.views.application_view import ApplicationView
 from epic_event.views.client_view import ClientView
 
-from epic_event.settings import SESSION
+from epic_event.settings import SESSION, ENTITIES
 
 
 class MainController:
@@ -100,29 +101,20 @@ class MainController:
             - If the user chooses to exit (option 5), the loop breaks.
         """
 
-        menu_entity = {
-            "1": "collaborator",
-            "2": "client",
-            "3": "contract",
-            "4": "event",
-            "5": "break"
-        }
-
         while True:
             self.app_view.clear_console()
             self.app_view.display_informative_message(
                 f"Bienvenue {user.full_name} - Service : {user.role}")
             self.app_view.display_entity_menu()
-            choice = self.app_view.choose_option()
+            choice = self.app_view.choose_field()
 
-            entity_name = menu_entity.get(choice)
-
-            if entity_name == "break":
+            if choice >= len(ENTITIES):  # choice of disconnection
                 break
 
-            elif entity_name:
-                self.handle_user_role_action(user, entity_name)
+            entity_name = ENTITIES[choice]
 
+            if entity_name:
+                self.handle_user_role_action(user, entity_name)
             else:
                 continue
 
@@ -183,7 +175,7 @@ class MainController:
             )
             options = permissions[entity_name][role]
 
-            self.app_view.display_menu_role(user.role, entity_name, options)
+            self.app_view.display_entity_menu_role(user.role, entity_name, options)
 
             choice = self.app_view.choose_option()
 
@@ -222,12 +214,15 @@ class MainController:
             entity_name (str): Name of the entity concerned.
         """
         menu_details = {
-            "1": lambda: self.entity_controller.filter_by_field_entity(
-                self.session, entity_name),
-            "2": lambda: self.entity_controller.order_by_field_entity(
-                self.session, entity_name),
-            "3": lambda: self.entity_controller.show_details_entity(
-                self.session, entity_name),
+            "1": lambda: self.entity_controller.filter_by_field_entity(user,
+                                                                       self.session,
+                                                                       entity_name),
+            "2": lambda: self.entity_controller.order_by_field_entity(user,
+                                                                      self.session,
+                                                                      entity_name),
+            "3": lambda: self.entity_controller.show_details_entity(user,
+                                                                    self.session,
+                                                                    entity_name),
             "4": "Retour"
         }
         while True:

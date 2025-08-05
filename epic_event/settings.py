@@ -16,6 +16,9 @@ import logging
 import logging.config
 
 
+ENTITIES = ["collaborator", "client", "contract", "event"]
+
+
 # to display names in French in the menus
 translate_entity = {
     "collaborator": "collaborateur",
