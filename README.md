@@ -91,18 +91,14 @@ pip install -r requirements.txt
 
 EpicEvent already contains the necessary data for tests or demos.
 
-Depending on the server launch command, the corresponding data will be loaded.
+Depending on the application launch command, the corresponding data will be loaded.
 
 ### 5. Start Cli application
 
 To see the data used for Pytest and Pexpect tests, 
+and discover the application's features, 
+enter the following command on the terminal:
 
-On the terminal enter following command to start the server::
-```bash
-python main.py test
-```
-
-To discover the application's features, enter following command to start the application:
 ```bash
 python main.py demo
 ```
@@ -113,29 +109,24 @@ For your own usage, enter following command to start the application:
 python main.py
 ```
 
-
 ### 6. Connexion
 
 To log in to a SUPERUSER account,
-- with test database:
+   
+- Fill in the name: Admin User and password: adminpass.
 
-    Fill in the name: Admin and password: mypassword
+- All demo database accounts use the password first name+pass.
 
-    All test database accounts use the same password
-
-
-- with others databases:
-    
-    Fill in the name: Admin User and password: adminpass.
-
-    All demo database accounts use the password first name+pass.
-
-    e.g: Alice Martin use alicepass as password
+  e.g: Alice Martin use alicepass as password
 
 ### 8. Tests
+to run the test, you need to install the package listed in the dev_requirement.txt
 
-all the tests as well as the server intended for them are already configured
+```bash
+pip install -r dev_requirements.txt
+```
 
+all the tests are already configured
 all you need is to enter the pytest command on the terminal.
 
 ```bash
