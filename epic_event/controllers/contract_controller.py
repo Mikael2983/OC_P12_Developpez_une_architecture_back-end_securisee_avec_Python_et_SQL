@@ -5,8 +5,8 @@ This module handles the creation of `Contract` instances based on user input,
 with minimal validation logic and interaction through the CLI view.
 
 """
-
 from datetime import date
+from typing import Union
 
 from epic_event.models.contract import Contract
 from epic_event.views.application_view import ApplicationView
@@ -29,13 +29,13 @@ class ContractController:
         """
         self.app_view = ApplicationView(SESSION)
 
-    def create(self, data):
+    def create(self, data: dict) -> Union[Contract, None]:
         """
         Create a new `Contract` instance from user-provided data.
 
         Validates required fields (client ID, total and due amounts, and signed
          status).
-        If validation fails, an error is shown and contract creation is aborted
+        If validation fails, displays an error message and returns None.
 
         Args:
             data (dict): Dictionary containing contract data fields.

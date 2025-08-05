@@ -5,6 +5,7 @@ This module handles the creation of `Event` instances based on user input,
 with minimal validation logic and interaction through the `ApplicationView`
 CLI.
 """
+from typing import Union
 
 from epic_event.models.event import Event
 from epic_event.views.application_view import ApplicationView
@@ -27,14 +28,13 @@ class EventController:
         """
         self.app_view = ApplicationView(SESSION)
 
-    def create(self, data):
+    def create(self, data: dict) -> Union[Event, None]:
         """
         Create a new `Event` instance from user-provided data.
 
         Validates required fields (title, start and end dates, location,
         participants, contract ID).
-        If validation fails, an error message is displayed and the process is
-        halted.
+        In case of an error, displays a message and returns None.
 
         Args:
             data (dict): Dictionary containing event data fields.

@@ -7,6 +7,7 @@ It relies on the ORM model `Client` and the CLI view `ApplicationView` for
 display.
 """
 from datetime import date
+from typing import Union
 
 from epic_event.models.client import Client
 
@@ -21,7 +22,7 @@ class ClientController:
     to create client objects from the provided data
     by the user.
     """
-    def __init__(self, SESSION):
+    def __init__(self, SESSION: dict):
         """
         Initializes the client controller with the user session.
 
@@ -31,13 +32,13 @@ class ClientController:
         """
         self.app_view = ApplicationView(SESSION)
 
-    def create(self, data):
+    def create(self, data: dict) -> Union[Client, None]:
         """
         Create an instance `Client` from the entered data.
 
         Checks that the mandatory fields are present before instantiating the
             model.
-        In case of an error, displays a message and stops the action.
+        In case of an error, displays a message and returns None.
 
         Args:
             data (dict): User data containing the attributes of the client.
