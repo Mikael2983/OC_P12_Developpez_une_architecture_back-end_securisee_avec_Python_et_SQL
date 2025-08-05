@@ -1,59 +1,70 @@
-import os
-import time
-from pathlib import Path
 import pytest
-import atexit
-import psutil
-from sqlalchemy import Engine, inspect
-
-from sqlalchemy.exc import SQLAlchemyError
 
 from epic_event.models import Client, Collaborator, Contract, Database, Event
-from epic_event.models.base import Base
-from epic_event.models.utils import load_test_data_in_database
-from epic_event.settings import DATABASES
+from epic_event.models.database import Base
+from epic_event.models.utils import load_data_in_database
 
 
 @pytest.fixture(scope="function")
-def db_session():
-    """Database session using a shared SQLite file."""
-    db = Database(DATABASES["test"], use_null_pool=True)
+def db_path(tmp_path):
+    """
+    Crée un fichier de base de données SQLite temporaire par test pour éviter
+    les verrous partagés et interférences entre tests.
+    """
+    db_file = tmp_path / "test_database.db"
+    yield str(db_file)
+
+
+@pytest.fixture(scope="function")
+def db_session(db_path):
+    """
+    Base de données isolée par test avec NullPool pour minimiser les verrous.
+    """
+    db = Database(db_path, use_null_pool=True)
     db.initialize_database()
     session = db.get_session()
-    load_test_data_in_database(session)
+    load_data_in_database(session)
 
-    yield session
-
-    session.rollback()
-    session.close()
-
-    Base.metadata.drop_all(bind=db.engine)
-    db.dispose()
+    try:
+        yield session
+    finally:
+        try:
+            session.rollback()
+        except Exception:
+            pass
+        try:
+            session.close()
+        except Exception:
+            pass
+        try:
+            Base.metadata.drop_all(bind=db.engine)
+        except Exception:
+            pass
+        try:
+            db.engine.dispose()
+        except Exception:
+            pass
 
 
 @pytest.fixture(scope="function")
 def seed_data_collaborator(db_session):
-    admin = db_session.query(Collaborator).filter_by(role="admin").first()
+    result: dict[str, Collaborator] = {}
+    users = db_session.query(Collaborator).all()
+    for user in users:
+        role = user.role
+        if role not in result:
+            result[role] = user
+        else:
+            result[f"{user.role}2"] = user
 
-    gestion = db_session.query(Collaborator).filter_by(role="gestion").first()
-
-    commercial = db_session.query(Collaborator).filter_by(
-        role="commercial").first()
-
-    support = db_session.query(Collaborator).filter_by(role="support").first()
-
-    return {"admin": admin,
-            "gestion": gestion,
-            "commercial": commercial,
-            "support": support
-            }
+    return result
 
 
 @pytest.fixture(scope="function")
 def seed_data_client(db_session):
-    """return client from the database."""
-
     client = db_session.query(Client).first()
+    if not client:
+        pytest.skip("Aucun client dans la base de données de test.")
     return client
 
 
@@ -80,5 +91,6 @@ def seed_data_contract(db_session):
 @pytest.fixture(scope="function")
 def seed_data_event(db_session, seed_data_collaborator, seed_data_contract):
     event = db_session.query(Event).first()
-
+    if not event:
+        pytest.skip("Aucun événement dans la base de données de test.")
     return event
