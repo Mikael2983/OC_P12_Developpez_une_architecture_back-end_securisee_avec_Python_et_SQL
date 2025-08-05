@@ -9,7 +9,6 @@ from rich.table import Table
 
 from epic_event.settings import (TITLE_STYLE, REQUEST_STYLE, TEXT_STYLE,
                                  SUCCESS_STYLE)
-from epic_event.views.utils_view import UtilsView
 
 
 class ClientView:
@@ -18,11 +17,8 @@ class ClientView:
 
     Attributes:
         console (Console): Rich Console instance for styled output.
-        utils_view (UtilsView): Instance of utility view class for styled
-            messages.
         SESSION (dict): Session dictionary controlling display options.
-        mapping (dict): Mapping of user input keys to client attributes and
-            labels.
+
     """
 
     def __init__(self, SESSION):
@@ -35,17 +31,6 @@ class ClientView:
         """
         self.SESSION = SESSION
         self.console = Console()
-        self.utils_view = UtilsView()
-        self.mapping = {
-            "1": ["id", "Id"],
-            "2": ["full_name", "Nom du contact"],
-            "3": ["email", "Email"],
-            "4": ["phone", "Téléphone"],
-            "5": ["company_name", "Compagnie"],
-            "6": ["created_date", "Date de création"],
-            "7": ["last_contact_date", "Dernier contact"],
-            "8": ["commercial.full_name", "Commercial"],
-        }
 
     def display_entity_list(self, clients):
         """
@@ -92,7 +77,7 @@ class ClientView:
             style=TEXT_STYLE,
             max_width=15)
         table.add_column(
-            "compagnie",
+            "Société",
             justify="center",
             style=TEXT_STYLE,
             max_width=15)

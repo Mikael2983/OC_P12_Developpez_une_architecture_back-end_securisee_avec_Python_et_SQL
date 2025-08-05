@@ -71,6 +71,29 @@ class ApplicationView:
                 REQUEST_STYLE
             ))
 
+    def choose_field(self) -> int:
+        """
+        Prompt the user to select an option from a menu.
+
+        Returns:
+            int: The index of the field selected in the list fields.
+        """
+        while True:
+            choice = self.console.input(
+                self.utils_view.apply_rich_style(
+                    "Sélectionnez une option:",
+                    REQUEST_STYLE
+                ))
+            try:
+                choice = int(choice)
+                break
+
+            except:
+                self.display_error_message("saisie non valide")
+                continue
+
+        return int(abs(choice) - 1)
+
     def valide_choice_menu(self):
         """
         Ask the user to confirm an operation.
@@ -143,7 +166,7 @@ class ApplicationView:
 
         self.utils_view.display_styled_menu(header, request, text)
 
-    def display_menu_role(self, role, entity_name, options):
+    def display_entity_menu_role(self, role, entity_name, options):
         """
         Displays a context menu based on the user’s role and the entity
         concerned.
@@ -181,11 +204,10 @@ class ApplicationView:
             5. Afficher les archives
             6. Retour
         """
-
-        header = f"--- Menu {role.capitalize()} ---"
-        request = "Sélectionnez une option ?"
-
         translated_entity = translate_entity[entity_name]
+
+        header = f"--- Menu {translated_entity.capitalize()} ---"
+        request = "Sélectionnez une option ?"
 
         display_options = {"details": "Afficher les détails",
                            "create": f"Créer un nouveau {translated_entity}",
@@ -215,7 +237,7 @@ class ApplicationView:
         Args:
             entity_name (str): The name of the entity to display details for.
         """
-        header = f"--- Menu détails {translate_entity[entity_name]} ---"
+        header = f"--- Menu détails ---"
         request = "Sélectionnez une option:"
 
         text = [
@@ -274,62 +296,61 @@ class ApplicationView:
                 TEXT_STYLE)).lower()
         return response.lower() in ["y", "yes", "o", "oui"]
 
-    def ask_filter_field_and_value(self, mapping):
+    def ask_filter_value(self, field):
         """
-        Prompt the user to choose a field and provide a value to filter by.
+        Prompt the user to provide a value to filter by.
 
         Args:
-            mapping (dict): A dictionary mapping field keys to tuples of
-                (ORM field, display name).
+            field (list): A list of ORM field keys to list of
+                [ORM field, display name].
 
         Returns:
-            tuple: A tuple containing the ORM field and the value, or
-                (None, None) if invalid.
+            tuple: A tuple containing the ORM field and the value.
         """
-        field_choice = self.console.input(
+        orm_field, display_name = field
+        value = self.console.input(
             self.utils_view.apply_rich_style(
-                "Choisissez un champ à filtrer: ",
+                f"Saisir la valeur pour '{display_name}' : ",
                 TEXT_STYLE
             ))
+        return orm_field, value.strip()
 
-        field_data = mapping.get(field_choice)
-
-        if field_data:
-            orm_field, display_name = field_data
-            value = self.console.input(
-                self.utils_view.apply_rich_style(
-                    f"Saisir la valeur pour '{display_name}' : ",
-                    TEXT_STYLE
-                ))
-            return orm_field, value.strip()
-
-        return None, None
-
-    def display_dict_field_choice_menu(self, mapping: dict):
+    def display_list_field_menu(self, entity_fields: list, purpose):
         """
-        Display a field selection menu based on a dictionary of field mappings.
+        For order request.
+        Display a field selection menu based on a list of entity fields.
 
         Args:
-            mapping (dict): Dictionary of field options with display names.
-
+            entity_fields (list): A list of list containing field metadata.
+            purpose (str): the reason why the user needs the menu
+                ( order or filter)
         Returns:
             Any: The result from the styled menu utility.
         """
         header = "--- Menu de sélection des champs ---"
-        request = "Sélectionnez un critère de tri"
 
-        text = [f"{key}. {value}" for key, (_, value) in
-                mapping.items()]
-        text.append(f"{len(mapping) + 1}. Retour")
+        if purpose == "order":
+            request = "Sélectionnez un critère de tri:"
+
+        if purpose == "filter":
+            request = "Choisissez un champ à filtrer: "
+
+        if purpose == "modify":
+            request = "Choisissez un champ à modifier: "
+
+        text = [f"{i + 1}. {entity_fields[i][1]}" for i in
+                range(len(entity_fields))]
+        text.append(f"{len(entity_fields) + 1}. Retour")
 
         self.utils_view.display_styled_menu(header, request, text)
 
-    def display_list_field_choice_menu(self, entity_fields: list):
+    def display_modify_field_menu(self, entity_fields: list):
         """
+        For modify request
         Display a field selection menu based on a list of entity fields.
 
         Args:
-            entity_fields (list): A list of tuples containing field metadata.
+            entity_fields (list): A list of list containing field metadata.
 
         Returns:
             Any: The result from the styled menu utility.

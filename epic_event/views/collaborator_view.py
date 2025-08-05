@@ -7,8 +7,8 @@ information in a styled table format using the Rich library.
 from rich.console import Console
 from rich.table import Table
 
-from epic_event.settings import TITLE_STYLE, REQUEST_STYLE, TEXT_STYLE, SUCCESS_STYLE
-from epic_event.views.utils_view import UtilsView
+from epic_event.settings import (TITLE_STYLE, REQUEST_STYLE,
+                                 TEXT_STYLE, SUCCESS_STYLE)
 
 
 class CollaboratorView:
@@ -17,11 +17,7 @@ class CollaboratorView:
 
     Attributes:
         console (Console): Rich Console instance for styled output.
-        utils_view (UtilsView): Instance of utility view class for styled
-            messages.
         SESSION (dict): Session dictionary controlling display options.
-        mapping (dict): Mapping of user input keys to collaborator attributes
-            and labels.
     """
     def __init__(self, SESSION):
         """
@@ -32,14 +28,7 @@ class CollaboratorView:
                             whether to show archived collaborators.
         """
         self.console = Console()
-        self.utils_view = UtilsView()
         self.SESSION = SESSION
-        self.mapping = {
-            "1": ["id", "Id"],
-            "2": ["full_name", "Nom"],
-            "3": ["email", "Email"],
-            "4": ["role", "Service"]
-        }
 
     def display_entity_list(self, collaborators: list):
         """

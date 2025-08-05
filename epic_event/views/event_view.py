@@ -2,7 +2,6 @@ from rich.console import Console
 from rich.table import Table
 
 from epic_event.settings import TITLE_STYLE, REQUEST_STYLE, TEXT_STYLE
-from epic_event.views.utils_view import UtilsView
 
 
 class EventView:
@@ -10,7 +9,6 @@ class EventView:
     def __init__(self, SESSION):
         self.SESSION = SESSION
         self.console = Console()
-        self.utils_view = UtilsView()
         self.mapping = {
             "1": ["id", "Id"],
             "2": ["title","titre"],
@@ -60,7 +58,7 @@ class EventView:
             max_width=15
         )
         table.add_column(
-            "ID contrat",
+            "N° Contrat",
             justify="center",
             style=TEXT_STYLE,
             max_width=7

@@ -7,8 +7,8 @@ information in a styled table format using the Rich library.
 from rich.console import Console
 from rich.table import Table
 
-from epic_event.settings import TITLE_STYLE, REQUEST_STYLE, TEXT_STYLE, SUCCESS_STYLE
-from epic_event.views.utils_view import UtilsView
+from epic_event.settings import (TITLE_STYLE, REQUEST_STYLE, TEXT_STYLE,
+                                 SUCCESS_STYLE)
 
 
 class ContractView:
@@ -17,11 +17,7 @@ class ContractView:
 
     Attributes:
         console (Console): Rich Console instance for styled output.
-        utils_view (UtilsView): Instance of utility view class for styled
-            messages.
         SESSION (dict): Session dictionary controlling display options.
-        mapping (dict): Mapping of user input keys to contract attributes and
-            labels.
     """
 
     def __init__(self, SESSION):
@@ -33,15 +29,7 @@ class ContractView:
                             whether to show archived clients.
         """
         self.SESSION = SESSION
-        self.utils_view = UtilsView()
         self.console = Console()
-        self.mapping = {
-            "1": ["id", "ID"],
-            "2": ["client.company_name", "client"],
-            "3": ["total_amount", "Somme Totale"],
-            "4": ["amount_due", "Somme Dûe"],
-            "5": ["signed", "Signé"]
-        }
 
     def display_entity_list(self, contracts):
 
@@ -68,13 +56,13 @@ class ContractView:
             max_width=20
         )
         table.add_column(
-            "total amount",
+            "Montant total",
             justify="center",
             style=SUCCESS_STYLE,
             max_width=15
         )
         table.add_column(
-            "amount_due",
+            "Montant dû",
             justify="center",
             style=SUCCESS_STYLE,
             max_width=15
