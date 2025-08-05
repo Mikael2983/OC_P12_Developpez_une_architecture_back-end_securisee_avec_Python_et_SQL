@@ -30,12 +30,12 @@ import logging
 
 from sqlalchemy import create_engine, NullPool
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session, sessionmaker
-
-from epic_event.models.base import Base
+from sqlalchemy.orm import Session, sessionmaker, declarative_base
 
 SESSION_CONTEXT = {}
 logger = logging.getLogger(__name__)
+
+Base = declarative_base()
 
 
 class Database:

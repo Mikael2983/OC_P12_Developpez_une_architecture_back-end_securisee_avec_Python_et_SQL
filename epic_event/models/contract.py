@@ -2,11 +2,10 @@
 import logging
 
 from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, relationship
 
 from epic_event.models import Client
-from epic_event.models.base import Base
+from epic_event.models.database import Base
 from epic_event.models.entity import Entity
 
 logger = logging.getLogger(__name__)
@@ -63,25 +62,65 @@ class Contract(Base, Entity):
         return "NON"
 
     @staticmethod
-    def get_field():
+    def get_fields(role, purpose: str) -> list[list[str]]:
         """
         Returns the list of a contract’s fields with their labels for display.
 
         Each item is a list composed of two strings:
-            - the technical name of the field used in ORM model,
+            - the technical name of the field used in the ORM model,
             - its readable label intended for the user interface.
+
+        Args:
+            purpose: purpose (str): Either 'list' (default) or "create" or
+                'modify' to apply stricter filters.
+            role: the connected user's role.
+        Returns:
+            fields: A list of editable fields, as [field, translation] pairs.
 
         Format:
             [["field_name", "Label"], ...]
         """
-        return [["id", "Id"],
+        all_fields = [
+            ["id", "Id"],
+            ["client_id", "Id du client"],
+            ["client.company_name", "Client"],
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["created_date", "Date de Creation"],
+            ["signed", "Signature"],
+            ["archived", "Archivé"]
+        ]
+
+        excepted_fields = {
+            "list": [
                 ["client_id", "Id du client"],
-                ["total_amount", "Montant total"],
-                ["amount_due", "Montant dû"],
-                ["created_date", "Date de Creation"],
-                ["signed", "Signature"],
                 ["archived", "Archivé"]
-                ]
+            ],
+            "create": [
+                ["id", "Id"],
+                ["client.company_name", "Client"],
+                ["created_date", "Date de Creation"],
+                ["archived", "Archivé"]
+            ],
+            "modify": [
+                ["id", "Id"],
+                ["client_id", "Id du client"],
+                ["client.company_name", "Client"],
+                ["created_date", "Date de Creation"],
+                ["archived", "Archivé"]
+            ]
+        }
+
+        fields = [field for field in all_fields if
+                  field not in excepted_fields[purpose]]
+
+        if role == "admin" and purpose != "create":
+            fields.append(["archived", "Archivé"])
+
+        if role not in ["admin", "gestion"] and purpose != "list":
+            fields = []
+
+        return fields
 
     @property
     def formatted_created_date(self):
@@ -136,7 +175,7 @@ class Contract(Base, Entity):
     def validate_amount_due(
             total_amount: str,
             amount_due: str
-            ) -> tuple[None, str] | tuple[str, None]:
+    ) -> tuple[None, str] | tuple[str, None]:
         """
         Validate total and due amounts.
 
@@ -171,7 +210,7 @@ class Contract(Base, Entity):
     def validate_client_id(
             db: Session,
             client_id: int
-            ) -> tuple[None, str] | tuple[int, None]:
+    ) -> tuple[None, str] | tuple[int, None]:
         """
         Validate that the client ID exists in the database.
 

@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, relationship
 
 from epic_event.models import Collaborator, Contract
-from epic_event.models.base import Base
+from epic_event.models.database import Base
 from epic_event.models.entity import Entity
 
 logger = logging.getLogger(__name__)
@@ -53,28 +53,73 @@ class Event(Base, Entity):
         return f"l'événement {self.title}"
 
     @staticmethod
-    def get_field():
+    def get_fields(role, purpose: str) -> list[list[str]]:
         """
         Returns the list of an event’s fields with their labels for display.
 
         Each item is a list composed of two strings:
-            - the technical name of the field used in ORM model,
+            - the technical name of the field used in the ORM model,
             - its readable label intended for the user interface.
+
+        Args:
+            purpose: purpose (str): Either 'list' or "create" or
+                'modify' to apply filters.
+            role: the connected user's role.
+
+        Returns :
+            fields: A list of editable fields, as [field, translation] pairs.
 
         Format:
             [["field_name", "Label"], ...]
         """
-        return [["id", "Id"],
-                ["contract_id", "Id du Contract"],
-                ["title", "Titre"],
-                ["start_date", "Date de début"],
-                ["end_date", "Date de fin"],
-                ["location", "Lieu"],
-                ["participants", "Participants"],
-                ["notes", "Notes"],
+        all_fields = [
+            ["id", "Id"],
+            ["contract.client.company_name", "Client"],
+            ["contract_id", "N° du Contrat"],
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+            ["support.full_name", "Organisateur"],
+            ["support_id", "Id de l'Organisateur"],
+            ["archived", "Archivé"]
+        ]
+        excepted_fields = {
+            "list": [
                 ["support_id", "Id de l'Organisateur"],
                 ["archived", "Archivé"]
-                ]
+            ],
+            "create": [
+                ["id", "Id"],
+                ["contract.client.company_name", "Client"],
+                ["support.full_name", "Organisateur"],
+                ["support_id", "Id de l'Organisateur"],
+                ["archived", "Archivé"]
+            ],
+            "modify": [
+                ["id", "Id"],
+                ["contract.client.company_name", "Client"],
+                ["support.full_name", "Organisateur"],
+                ["support_id", "Id de l'Organisateur"],
+                ["contract_id", "N° du Contrat"],
+                ["archived", "Archivé"]
+            ]
+        }
+        fields = [field for field in all_fields if
+                  field not in excepted_fields[purpose]]
+
+        if role == "admin" and purpose != "create":
+            fields.append(["archived", "Archivé"])
+
+        if role == "admin" and purpose == "modify":
+            fields.append(["support_id", "Id de l'Organisateur"])
+
+        if role == "gestion" and purpose == "modify":
+            fields = [["support_id", "Id de l'Organisateur"]]
+
+        return fields
 
     @property
     def formatted_archived(self):

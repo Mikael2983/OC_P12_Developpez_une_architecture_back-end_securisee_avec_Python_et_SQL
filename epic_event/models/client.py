@@ -8,7 +8,7 @@ from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Session, relationship
 
 from epic_event.models.collaborator import Collaborator
-from epic_event.models.base import Base
+from epic_event.models.database import Base
 from epic_event.models.entity import Entity
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class Client(Base, Entity):
         return f"le client {self.company_name} representé par {self.full_name}"
 
     @staticmethod
-    def get_field():
+    def get_fields(role, purpose: str) -> list[list[str]]:
         """
         Returns the list of a client’s fields with their labels for display.
 
@@ -59,18 +59,57 @@ class Client(Base, Entity):
             - the technical name of the field used in ORM model,
             - its readable label intended for the user interface.
 
+        Args:
+            purpose: purpose (str): Either 'list' (default) or "create" or
+                'modify' to apply stricter filters.
+            role: the connected user's role.
+
+        Returns :
+            fields: A list of editable fields, as [field, translation] pairs.
+
         Format:
             [["field_name", "Label"], ...]
         """
-        return [["id", "Id"],
-                ["full_name", "Nom du contact"],
-                ["email", "Email"],
-                ["phone", "Téléphone"],
-                ["company_name", "Société"],
-                ["created_date", "Date de création"],
-                ["last_contact_date", "Dernier contact"],
+        all_fields = [
+            ["id", "Id"],
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["created_date", "Date de création"],
+            ["last_contact_date", "Dernier contact"],
+            ["commercial.full_name", "Commercial"],
+            ["id_commercial", "Id Commercial"],
+            ["archived", "Archivé"]
+        ]
+        excepted_fields = {
+            "list": [
                 ["id_commercial", "Id Commercial"],
-                ["archived", "Archivé"]]
+                ["archived", "Archivé"]
+            ],
+            "create": [
+                ["id", "Id"],
+                ["commercial.full_name", "Commercial"],
+                ["created_date", "Date de création"],
+                ["archived", "Archivé"]
+            ],
+            "modify": [
+                ["id", "Id"],
+                ["commercial.full_name", "Commercial"],
+                ["archived", "Archivé"]
+            ]
+        }
+
+        fields = [field for field in all_fields if
+                  field not in excepted_fields[purpose]]
+
+        if role == "admin" and purpose != "create":
+            fields.append(["archived", "Archivé"])
+
+        if role not in ["admin", "commercial"] and purpose != "list":
+            fields = []
+
+        return fields
 
     @property
     def formatted_archived(self):
@@ -269,5 +308,3 @@ class Client(Base, Entity):
             return None, error
 
         return id_commercial, None
-
-

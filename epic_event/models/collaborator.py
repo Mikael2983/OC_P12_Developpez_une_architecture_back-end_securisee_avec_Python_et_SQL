@@ -1,14 +1,12 @@
 """Collaborator ORM model with validation, error handling, and relationships."""
 import logging
 import re
-from typing import Literal, Any
 
 import bcrypt
 from sqlalchemy import Boolean, Column, Integer, LargeBinary, String
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, relationship
 
-from epic_event.models.base import Base
+from epic_event.models.database import Base
 from epic_event.models.entity import Entity
 
 SERVICES = ["gestion", "commercial", "support"]
@@ -57,18 +55,26 @@ class Collaborator(Base, Entity):
         return "NON"
 
     @staticmethod
-    def get_field() -> list[list[str]]:
+    def get_fields(role, purpose: str) -> list[list[str]]:
         """
         Returns the list of a collaborator’s fields with their labels for display.
 
         Each item is a list composed of two strings:
-            - the technical name of the field used in ORM model,
+            - the technical name of the field used in the ORM model,
             - its readable label intended for the user interface.
+
+        Args:
+            purpose: purpose (str): Either 'list' (default) or "create" or
+                'modify' to apply stricter filters.
+            role: the connected user's role.
+
+        Returns :
+            fields: A list of editable fields, as [field, translation] pairs.
 
         Format:
             [["field_name", "Label"], ...]
         """
-        return [
+        all_fields = [
             ["id", "Id"],
             ['full_name', "Nom"],
             ['password', "Mot de passe"],
@@ -76,6 +82,32 @@ class Collaborator(Base, Entity):
             ['role', "Service"],
             ["archived", "Archivé"]
         ]
+        excepted_fields = {
+            "list": [
+                ['password', "Mot de passe"],
+                ["archived", "Archivé"]
+            ],
+            "create": [
+                ["id", "Id"],
+                ["archived", "Archivé"]
+            ],
+            "modify": [
+                ["id", "Id"],
+                ['password', "Mot de passe"],
+                ["archived", "Archivé"]
+            ]
+        }
+
+        fields = [field for field in all_fields if
+                  field not in excepted_fields[purpose]]
+
+        if role == "admin" and purpose != "create":
+            fields.append(["archived", "Archivé"])
+
+        if role not in ["admin", "gestion"] and purpose != "list":
+            fields = []
+
+        return fields
 
     @staticmethod
     def validate_full_name(
@@ -116,7 +148,6 @@ class Collaborator(Base, Entity):
             return None, msg_error
 
         return full_name, None
-
 
     @staticmethod
     def validate_email(db: Session, email: str) -> tuple[None, str] | tuple[
