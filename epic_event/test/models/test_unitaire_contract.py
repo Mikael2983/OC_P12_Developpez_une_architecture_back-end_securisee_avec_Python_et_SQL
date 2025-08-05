@@ -31,11 +31,64 @@ def test_formatted_created_date():
 
 
 # ---------- Static Display Fields ----------
-def test_get_field():
-    fields = Contract.get_field()
-    expected = ["id", "client_id", "total_amount", "amount_due",
-                "created_date", "signed", "archived"]
-    assert [f[0] for f in fields] == expected
+@pytest.mark.parametrize(
+    "role,purpose,expected_fields",
+    [
+        ("default", "list", [
+            ["id", "Id"],
+            ["client.company_name", "Client"],
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["created_date", "Date de Creation"],
+            ["signed", "Signature"],
+        ]),
+        ("default", "create", []),
+        ("default", "modify", []),
+        ("gestion", "list", [
+            ["id", "Id"],
+            ["client.company_name", "Client"],
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["created_date", "Date de Creation"],
+            ["signed", "Signature"],
+        ]),
+        ("gestion", "create", [
+            ["client_id", "Id du client"],
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["signed", "Signature"],
+        ]),
+        ("gestion", "modify", [
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["signed", "Signature"],
+        ]),
+        ("admin", "list", [
+            ["id", "Id"],
+            ["client.company_name", "Client"],
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["created_date", "Date de Creation"],
+            ["signed", "Signature"],
+            ["archived", "Archivé"],
+        ]),
+        ("admin", "create", [
+            ["client_id", "Id du client"],
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["signed", "Signature"],
+        ]),
+        ("admin", "modify", [
+            ["total_amount", "Montant total"],
+            ["amount_due", "Montant dû"],
+            ["signed", "Signature"],
+            ["archived", "Archivé"],
+        ]),
+    ],
+)
+def test_contract_get_fields(role, purpose, expected_fields):
+    fields = Contract.get_fields(role, purpose)
+    assert sorted(fields) == sorted(expected_fields)
 
 
 # ---------- Validation: Signed ----------

@@ -4,7 +4,7 @@ import pytest
 from datetime import date
 from unittest.mock import patch, MagicMock
 
-from epic_event.controllers.contractcontroller import ContractController
+from epic_event.controllers.contract_controller import ContractController
 from epic_event.models.contract import Contract
 
 

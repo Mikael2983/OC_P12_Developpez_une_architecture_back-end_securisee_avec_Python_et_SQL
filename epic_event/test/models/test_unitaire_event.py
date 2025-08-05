@@ -1,9 +1,112 @@
 """Unit tests for the Event ORM model"""
+from types import SimpleNamespace
+
 import pytest
 from datetime import datetime
 
 from epic_event.models import Collaborator
 from epic_event.models.event import Event
+
+
+# ---------- Static Display Fields ----------
+@pytest.mark.parametrize(
+    "role,purpose,expected_fields",
+    [
+        ("commercial", "list", [
+            ["id", "Id"],
+            ["contract.client.company_name", "Client"],
+            ["contract_id", "N° du Contrat"],
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+            ["support.full_name", "Organisateur"],
+        ]),
+        ("commercial", "create", [
+            ["contract_id", "N° du Contrat"],
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+        ]),
+
+        ("support", "list", [
+            ["id", "Id"],
+            ["contract.client.company_name", "Client"],
+            ["contract_id", "N° du Contrat"],
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+            ["support.full_name", "Organisateur"],
+        ]),
+        ("support", "modify", [
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+        ]),
+        ("gestion", "list", [
+            ["id", "Id"],
+            ["contract.client.company_name", "Client"],
+            ["contract_id", "N° du Contrat"],
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+            ["support.full_name", "Organisateur"],
+        ]),
+
+        ("gestion", "modify", [
+            ["support_id", "Id de l'Organisateur"],
+        ]),
+        ("admin", "list", [
+            ["id", "Id"],
+            ["contract.client.company_name", "Client"],
+            ["contract_id", "N° du Contrat"],
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+            ["support.full_name", "Organisateur"],
+            ["archived", "Archivé"],
+        ]),
+        ("admin", "create", [
+            ["contract_id", "N° du Contrat"],
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+        ]),
+        ("admin", "modify", [
+            ["title", "Titre"],
+            ["start_date", "Date de début"],
+            ["end_date", "Date de fin"],
+            ["location", "Lieu"],
+            ["participants", "Nombre de participants"],
+            ["notes", "Notes"],
+            ["support_id", "Id de l'Organisateur"],
+            ["archived", "Archivé"],
+        ]),
+    ],
+)
+def test_event_get_fields_roles(role, purpose, expected_fields):
+    fields = Event.get_fields(role, purpose)
+    assert sorted(fields) == sorted(expected_fields)
 
 
 # ---------- validate_title ----------

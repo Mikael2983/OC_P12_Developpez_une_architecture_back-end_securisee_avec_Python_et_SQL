@@ -81,20 +81,20 @@ def test_ask_descending_order_no(mock_input, app_view):
 
 
 # === Tests de filtres et champs ===
-@patch("rich.console.Console.input", side_effect=["1", "john"])
+@patch("rich.console.Console.input", side_effect=["john"])
 def test_ask_filter_field_and_value_valid(mock_input, app_view):
-    mapping = {"1": ("name", "Name")}
-    field, value = app_view.ask_filter_field_and_value(mapping)
+    mapping = ["name", "Nom"]
+    field, value = app_view.ask_filter_value(mapping)
     assert field == "name"
     assert value == "john"
 
 
-@patch("rich.console.Console.input", return_value="invalid")
-def test_ask_filter_field_and_value_invalid(mock_input, app_view):
-    mapping = {"1": ("name", "Name")}
-    field, value = app_view.ask_filter_field_and_value(mapping)
-    assert field is None
-    assert value is None
+@patch("rich.console.Console.input", return_value="   ")
+def test_ask_filter_field_and_value_empty_string(mock_input, app_view):
+    mapping = ["name", "Nom"]
+    field, value = app_view.ask_filter_value(mapping)
+    assert field == "name"
+    assert value == ""
 
 
 # === Tests d’affichage de message===
@@ -140,16 +140,16 @@ def test_break_point(mock_input, mock_print, app_view):
 # === Tests de menus dynamiques ===
 
 def test_display_dict_field_choice_menu(app_view):
-    entity_mapping = {"1": ("email", "Email")}
+    entity_mapping = ["email", "Email"]
     app_view.utils_view.display_styled_menu = MagicMock()
-    app_view.display_dict_field_choice_menu(entity_mapping)
+    app_view.display_list_field_menu(entity_mapping, "order")
     app_view.utils_view.display_styled_menu.assert_called_once()
 
 
-def test_display_list_field_choice_menu(app_view):
-    entity_fields = [("email", "Email"), ("name", "Name")]
+def test_display_modify_field_choice_menu(app_view):
+    entity_fields = [["email", "Email"], ["name", "Name"]]
     app_view.utils_view.display_styled_menu = MagicMock()
-    app_view.display_list_field_choice_menu(entity_fields)
+    app_view.display_modify_field_menu(entity_fields)
     app_view.utils_view.display_styled_menu.assert_called_once()
 
 
@@ -158,7 +158,7 @@ def test_display_list_field_choice_menu(app_view):
 def test_display_menu_role_admin(app_view):
     mock_options = ["details", "create", "modify"]
     app_view.utils_view.display_styled_menu = MagicMock()
-    app_view.display_menu_role("admin","client", mock_options)
+    app_view.display_entity_menu_role("admin", "client", mock_options)
     app_view.utils_view.display_styled_menu.assert_called_once()
 
 
@@ -166,7 +166,7 @@ def test_display_menu_role_toggle_archive(app_view, mock_session):
     mock_session["show_archived"] = True
     mock_options = ["details", "create", "modify"]
     app_view.utils_view.display_styled_menu = MagicMock()
-    app_view.display_menu_role(
+    app_view.display_entity_menu_role(
         "admin",
         "contract",
         mock_options

@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from epic_event.controllers.collaboratorcontroller import CollaboratorController
+from epic_event.controllers.collaborator_controller import CollaboratorController
 from epic_event.models.collaborator import Collaborator
 
 

@@ -49,16 +49,8 @@ def mock_contracts():
     return [contract1, contract2]
 
 
-# === Test de mapping ===
-def test_mapping_fields(contract_view_with_archived):
-    mapping = contract_view_with_archived.mapping
-    assert mapping["1"] == ["id", "ID"]
-    assert mapping["2"] == ["client.company_name", "client"]
-    assert mapping["5"] == ["signed", "Signé"]
-
-
 # === Tests de display_entity_list ===
-# === Sans archivés ===
+# === Without archived ===
 @patch("rich.console.Console.print")
 def test_display_entity_list_without_archived(mock_print,
                                               contract_view_without_archived,
@@ -73,7 +65,7 @@ def test_display_entity_list_without_archived(mock_print,
     assert table.row_count == 2
 
 
-# === Avec archivés ===
+# === with archived ===
 @patch("rich.console.Console.print")
 def test_display_entity_list_with_archived(mock_print,
                                            contract_view_with_archived,

@@ -2,6 +2,9 @@ import re
 import sys
 
 import pexpect.popen_spawn
+import unicodedata
+
+from epic_event.test.conftest import seed_data_collaborator
 
 
 def expect_prompt(child, prompt_text):
@@ -13,7 +16,7 @@ def expect_prompt(child, prompt_text):
 
 def init_programme():
     child = pexpect.popen_spawn.PopenSpawn(
-        "python main.py test",
+        "python main.py demo",
         encoding="cp1252",
         timeout=10
     )
@@ -21,15 +24,25 @@ def init_programme():
     return child
 
 
-def commercial_connexion(child):
+def commercial_connexion(child, seed_data_collaborator, role="commercial"):
+    commercial = seed_data_collaborator[role]
     child.sendline("1")
     child.expect("Nom d'utilisateur")
-    child.sendline("Dup")
+    child.sendline(commercial.full_name)
+
     child.expect("Password")
-    child.sendline("mypassword")
+    first_name = commercial.full_name.strip().split()[0]
+
+    normalized = unicodedata.normalize("NFKD", first_name)
+    without_accents = "".join(
+        c for c in normalized if not unicodedata.combining(c)
+    )
+    cleaned = re.sub(r"[^a-zA-Z]", "", without_accents).lower()
+
+    child.sendline(f"{cleaned}pass")
 
 
-def test_commercial_create_client(db_session):
+def test_commercial_create_client(db_session, seed_data_collaborator):
     # Lance le programme
 
     child = init_programme()
@@ -40,7 +53,7 @@ def test_commercial_create_client(db_session):
     expect_prompt(child, "Sélectionnez une option:")
 
     # Connexion
-    commercial_connexion(child)
+    commercial_connexion(child, seed_data_collaborator)
 
     # Menu entité
     child.expect("1. Collaborateur")
@@ -92,7 +105,8 @@ def test_commercial_create_client(db_session):
     child.expect(pexpect.EOF)
 
 
-def test_commercial_create_event(db_session, seed_data_contract):
+def test_commercial_create_event(db_session, seed_data_contract,
+                                 seed_data_collaborator):
     # Lance le programme
 
     contract = seed_data_contract[0]
@@ -105,7 +119,7 @@ def test_commercial_create_event(db_session, seed_data_contract):
     expect_prompt(child, "Sélectionnez une option:")
 
     # Connexion
-    commercial_connexion(child)
+    commercial_connexion(child, seed_data_collaborator, "commercial2")
 
     # Menu entité
     child.expect("1. Collaborateur")
@@ -125,7 +139,7 @@ def test_commercial_create_event(db_session, seed_data_contract):
     # Créer un contrat
     child.sendline("2")
 
-    child.expect("Id du Contract")
+    child.expect("N° du Contrat")
     child.sendline(str(contract.id))
     child.expect("Titre")
     child.sendline("anniversaire 50ans")
@@ -135,7 +149,7 @@ def test_commercial_create_event(db_session, seed_data_contract):
     child.sendline("25-09-2025 21:00")
     child.expect("Lieu")
     child.sendline("Lieu test")
-    child.expect("Participants")
+    child.expect("Nombre de participants")
     child.sendline("200")
     child.expect("Notes")
     child.sendline("exemple de notes")
@@ -160,7 +174,9 @@ def test_commercial_create_event(db_session, seed_data_contract):
     child.expect(pexpect.EOF)
 
 
-def test_commercial_create_event_with_no_signed_contract(db_session, seed_data_contract):
+def test_commercial_create_event_with_no_signed_contract(db_session,
+                                                         seed_data_contract,
+                                                         seed_data_collaborator):
     # Lance le programme
 
     contract = seed_data_contract[0]
@@ -173,7 +189,7 @@ def test_commercial_create_event_with_no_signed_contract(db_session, seed_data_c
     expect_prompt(child, "Sélectionnez une option:")
 
     # Connexion
-    commercial_connexion(child)
+    commercial_connexion(child, seed_data_collaborator)
 
     # Menu entité
     child.expect("1. Collaborateur")
@@ -192,24 +208,7 @@ def test_commercial_create_event_with_no_signed_contract(db_session, seed_data_c
 
     # Créer un contrat
     child.sendline("2")
-
-    child.expect("Id du Contract")
-    child.sendline(str(contract.id))
-    child.expect("Titre")
-    child.sendline("anniversaire 50ans")
-    child.expect("Date de début")
-    child.sendline("25/09/2025 09:00")
-    child.expect("Date de fin")
-    child.sendline("25-09-2025 21:00")
-    child.expect("Lieu")
-    child.sendline("Lieu test")
-    child.expect("Participants")
-    child.sendline("200")
-    child.expect("Notes")
-    child.sendline("exemple de notes")
-
-    expect_prompt(child, "créé avec succès.")
-    expect_prompt(child, "appuyer sur une touche pour continuer")
+    child.expect("aucun élément disponible")
     child.sendline("")
     # Retour au menu principal
 

@@ -21,10 +21,58 @@ def test_formatted_archived():
 
 
 # ---------- Get Fields ----------
-def test_get_field():
-    expected = ["id", "full_name", "password", "email", "role", "archived"]
-    fields = [f[0] for f in Collaborator.get_field()]
-    assert fields == expected
+@pytest.mark.parametrize(
+    "role,purpose,expected_fields",
+    [
+        ("user", "list", [
+            ["id", "Id"],
+            ['full_name', "Nom"],
+            ['email', "Email"],
+            ['role', "Service"],
+        ]),
+        ("user", "create", []),
+        ("user", "modify", []),
+        ("gestion", "list", [
+            ["id", "Id"],
+            ['full_name', "Nom"],
+            ['email', "Email"],
+            ['role', "Service"],
+        ]),
+        ("gestion", "create", [
+            ['full_name', "Nom"],
+            ['password', "Mot de passe"],
+            ['email', "Email"],
+            ['role', "Service"],
+        ]),
+        ("gestion", "modify", [
+            ['full_name', "Nom"],
+            ['email', "Email"],
+            ['role', "Service"],
+        ]),
+        ("admin", "list", [
+            ["id", "Id"],
+            ['full_name', "Nom"],
+            ['email', "Email"],
+            ['role', "Service"],
+            ["archived", "Archivé"],
+        ]),
+        ("admin", "create", [
+            ['full_name', "Nom"],
+            ['password', "Mot de passe"],
+            ['email', "Email"],
+            ['role', "Service"],
+        ]),
+        ("admin", "modify", [
+            ['full_name', "Nom"],
+            ['email', "Email"],
+            ['role', "Service"],
+            ["archived", "Archivé"],
+        ]),
+    ],
+)
+def test_get_fields(role, purpose, expected_fields):
+    fields = Collaborator.get_fields(role, purpose)
+    assert sorted(fields) == sorted(expected_fields)
 
 
 # ---------- Validate Full Name ----------

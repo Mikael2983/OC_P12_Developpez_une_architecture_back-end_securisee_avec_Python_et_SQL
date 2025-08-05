@@ -55,14 +55,6 @@ def mock_clients():
     return [client1, client2]
 
 
-# === Test de mapping ===
-def test_mapping_fields(client_view_with_archived):
-    mapping = client_view_with_archived.mapping
-    assert mapping["1"] == ["id", "Id"]
-    assert mapping["5"] == ["company_name", "Compagnie"]
-    assert mapping["8"] == ["commercial.full_name", "Commercial"]
-
-
 # === Tests de display_entity_list ===
 # === Sans archivés ===
 @patch("rich.console.Console.print")

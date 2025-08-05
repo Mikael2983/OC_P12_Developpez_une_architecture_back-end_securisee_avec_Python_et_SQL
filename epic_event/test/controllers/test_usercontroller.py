@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from epic_event.controllers.usercontroller import UserController
+from epic_event.controllers.user_controller import UserController
 from epic_event.models.collaborator import Collaborator
 
 
@@ -22,7 +22,7 @@ def controller(mock_cli_session):
 
 def test_connexion_success(controller, db_session, seed_data_collaborator):
     user = seed_data_collaborator["gestion"]
-    controller.app_view.display_connection_menu.return_value = (user.full_name, "mypassword")
+    controller.app_view.display_connection_menu.return_value = (user.full_name, "alicepass")
 
     result = controller.connexion(db_session)
 
@@ -50,6 +50,6 @@ def test_connexion_user_not_found(controller, db_session):
 
     assert result is None
     controller.app_view.display_error_message.assert_called_once_with(
-        "identifiant et/ou mot de passe incorrect"
+        "utilisateur introuvable"
     )
     controller.app_view.break_point.assert_called_once()

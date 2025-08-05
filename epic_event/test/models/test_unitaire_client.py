@@ -1,5 +1,4 @@
 """Unit tests for the Client ORM model"""
-
 import pytest
 import logging
 from datetime import date
@@ -30,6 +29,84 @@ def test_formatted_last_contact_date():
     client = Client(last_contact_date=date(2024, 5, 20))
     assert client.formatted_last_contact_date == "20-05-2024"
 
+
+# ---------- Static Display Fields ----------
+@pytest.mark.parametrize(
+    "role,purpose,expected_fields",
+    [
+        ("user", "list", [
+            ["id", "Id"],
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["created_date", "Date de création"],
+            ["last_contact_date", "Dernier contact"],
+            ["commercial.full_name", "Commercial"],
+        ]),
+        ("user", "create", []),
+        ("user", "modify", []),
+        ("commercial", "list", [
+            ["id", "Id"],
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["created_date", "Date de création"],
+            ["last_contact_date", "Dernier contact"],
+            ["commercial.full_name", "Commercial"],
+        ]),
+        ("commercial", "create", [
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["last_contact_date", "Dernier contact"],
+            ["id_commercial", "Id Commercial"],
+        ]),
+        ("commercial", "modify", [
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["created_date", "Date de création"],
+            ["last_contact_date", "Dernier contact"],
+            ["id_commercial", "Id Commercial"],
+        ]),
+        ("admin", "list", [
+            ["id", "Id"],
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["created_date", "Date de création"],
+            ["last_contact_date", "Dernier contact"],
+            ["commercial.full_name", "Commercial"],
+            ["archived", "Archivé"],
+        ]),
+        ("admin", "create", [
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["last_contact_date", "Dernier contact"],
+            ["id_commercial", "Id Commercial"],
+        ]),
+        ("admin", "modify", [
+            ["full_name", "Nom du contact"],
+            ["email", "Email"],
+            ["phone", "Téléphone"],
+            ["company_name", "Société"],
+            ["created_date", "Date de création"],
+            ["last_contact_date", "Dernier contact"],
+            ["id_commercial", "Id Commercial"],
+            ["archived", "Archivé"],
+        ]),
+    ],
+)
+def test_get_fields(role, purpose, expected_fields):
+    fields = Client.get_fields(role, purpose)
+    assert sorted(fields) == sorted(expected_fields)
 
 # --------------------------
 # Validation Tests

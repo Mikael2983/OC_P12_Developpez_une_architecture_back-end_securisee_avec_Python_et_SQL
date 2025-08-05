@@ -13,7 +13,7 @@ def expect_prompt(child, prompt_text):
 
 def init_programme():
     child = pexpect.popen_spawn.PopenSpawn(
-        "python main.py test",
+        "python main.py demo",
         encoding="cp1252",
         timeout=10
     )
@@ -24,7 +24,7 @@ def init_programme():
 def support_connexion(child, password):
     child.sendline("1")
     child.expect("Nom d'utilisateur")
-    child.sendline("Bob")
+    child.sendline("David Morel")
     child.expect("Password")
     child.sendline(password)
 
@@ -40,7 +40,7 @@ def test_support_modify_password():
     expect_prompt(child, "Sélectionnez une option:")
 
     # Connexion
-    support_connexion(child, "mypassword")
+    support_connexion(child, "davidpass")
 
     # Menu entité
     child.expect("1. Collaborateur")
@@ -62,23 +62,29 @@ def test_support_modify_password():
     child.sendline("2")
     child.expect("Vous n'avez pas l'autorisation")
 
-    child.sendline("4")
-    child.expect("1. mot de passe")
+    child.sendline("5")
+    child.expect("1. Mot de passe")
 
     child.sendline("1")
     expect_prompt(child, "veuillez renseigner mot de passe")
-    child.sendline("bobpass")
+    child.sendline("passdavid")
     child.expect("Le champ password a été mis à jour")
     child.sendline("")
     child.expect("3. Enregistrer")
     child.sendline("3")
+
     child.sendline("3")
     child.sendline("5")
     child.sendline("1")
-    child.sendline("Bob")
-    child.sendline("bobpass")
-    child.expect("Bienvenue Bob - Service : support")
+    child.sendline("David Morel")
+    child.sendline("passdavid")
+    child.expect("Bienvenue David Morel - Service : support")
+    child.expect("5. Déconnexion")
+    child.sendline("5")
+    # quitter
+    child.sendline("2")
 
+    child.expect(pexpect.EOF)
 
 def test_support_modify_event():
     # Lance le programme
@@ -91,7 +97,7 @@ def test_support_modify_event():
     expect_prompt(child, "Sélectionnez une option:")
 
     # Connexion
-    support_connexion(child, "bobpass")
+    support_connexion(child, "davidpass")
 
     # Menu entité
     child.expect("1. Collaborateur")
@@ -109,9 +115,9 @@ def test_support_modify_event():
     child.sendline("2")
     # Sélectionner l'événement
     child.expect("entrer l'id du événement")
-    child.sendline("1")
+    child.sendline("4")
     # Sélectionner le champ participants
-    child.expect("5. Participants")
+    child.expect("5. Nombre de participants")
     child.sendline("5")
     child.sendline("150")
     child.sendline("")
@@ -144,7 +150,7 @@ def test_support_modify_wrong_event():
     expect_prompt(child, "Sélectionnez une option:")
 
     # Connexion
-    support_connexion(child, "bobpass")
+    support_connexion(child, "davidpass")
 
     # Menu entité
     child.expect("1. Collaborateur")
@@ -162,5 +168,14 @@ def test_support_modify_wrong_event():
     child.sendline("2")
     # Sélectionner l'événement
     child.expect("entrer l'id du événement")
+    child.sendline("1")
+    expect_prompt(child, "Vous n'avez pas l'autorisation de modifier ce événement")
+    child.sendline("")
+    child.expect("4. Retour")
+    child.sendline("4")
+    # déconnexion
+    child.sendline("5")
+    # quitter
     child.sendline("2")
-    child.expect("événement introuvable.")
+
+    child.expect(pexpect.EOF)

@@ -4,7 +4,11 @@ Controller module for managing user authentication in the CLI application.
 Handles login logic, verifying user credentials using the Collaborator model
 and interacting with the CLI through ApplicationView.
 """
+from typing import Union
 
+from sqlalchemy.orm import Session
+
+from epic_event.models import collaborator
 from epic_event.views.application_view import ApplicationView
 from epic_event.models.collaborator import Collaborator
 
@@ -26,7 +30,7 @@ class UserController:
         """
         self.app_view = ApplicationView(SESSION)
 
-    def connexion(self, session):
+    def connexion(self, session: Session) -> Union[collaborator, None]:
         """
         Authenticate the user by checking credentials from the input menu.
 
@@ -41,11 +45,8 @@ class UserController:
                                  or None if authentication fails.
         """
         username, password = self.app_view.display_connection_menu()
-        users = session.query(Collaborator).filter_by(full_name=username).all()
-
-        if users:
-            user = users[0]
-
+        user = session.query(Collaborator).filter_by(full_name=username).first()
+        if user:
             if user.check_password(password):
                 return user
             else:
@@ -53,9 +54,7 @@ class UserController:
                     "identifiant et/ou mot de passe incorrect")
                 self.app_view.break_point()
                 return None
-
-        else:
-            self.app_view.display_error_message(
-                "identifiant et/ou mot de passe incorrect")
-            self.app_view.break_point()
-            return None
+        self.app_view.display_error_message(
+            "utilisateur introuvable")
+        self.app_view.break_point()
+        return None

@@ -4,7 +4,7 @@ import pytest
 from datetime import date
 from unittest.mock import patch, MagicMock
 
-from epic_event.controllers.eventcontroller import EventController
+from epic_event.controllers.event_controller import EventController
 from epic_event.models.event import Event
 
 

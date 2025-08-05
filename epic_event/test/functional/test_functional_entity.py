@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
-from epic_event.controllers.maincontroller import MainController
-from epic_event.controllers.entitycontroller import EntityController
+from epic_event.controllers.main_controller import MainController
+from epic_event.controllers.entity_controller import EntityController
 from epic_event.models import Collaborator, Client, Contract
 
 
@@ -10,7 +10,7 @@ def test_handle_entity_action_valid_choice(seed_data_collaborator):
     user = seed_data_collaborator["admin"]
 
     app_view = MagicMock()
-    app_view.choose_option.side_effect = ["1", "5"]  # collaborator, then break
+    app_view.choose_field.side_effect = [0, 4]
     app_view.clear_console.return_value = None
     app_view.display_informative_message.return_value = None
     app_view.display_entity_menu.return_value = None
@@ -20,13 +20,14 @@ def test_handle_entity_action_valid_choice(seed_data_collaborator):
     mc.handle_user_role_action = MagicMock()
 
     mc.handle_entity_action(user)
-    mc.handle_user_role_action.assert_called_once_with(user, "collaborator")
+
+    mc.handle_user_role_action.assert_called_with(user, "collaborator")
 
 
 def test_handle_entity_action_invalid_choice(seed_data_collaborator):
     user = seed_data_collaborator["admin"]
     app_view = MagicMock()
-    app_view.choose_option.side_effect = ["10", "5"]
+    app_view.choose_field.side_effect = [10, 4]
     app_view.clear_console.return_value = None
     app_view.display_entity_menu.return_value = None
 
@@ -60,17 +61,24 @@ def test_show_archived_toggle():
 
 
 # ---------- Integration Test: EntityController get_model_fields ----------
-def test_get_model_fields_default(seed_data_collaborator):
+def test_collaborator_get_fields_default_list_excludes_password(seed_data_collaborator):
+    """
+    Par défaut (list) pour un support, le champ 'password' doit être absent.
+    On vérifie aussi que chaque champ retourné est une paire [clé, label].
+    """
     user = seed_data_collaborator["support"]
-    fields = EntityController.get_model_fields(Collaborator, user)
+    fields = Collaborator.get_fields(user.role, "list")
     assert all(isinstance(f, list) for f in fields)
+    assert not any(f[0] == "password" for f in fields), "Le champ password ne doit pas apparaître en 'list' pour support."
 
 
-def test_get_model_fields_with_instance(seed_data_collaborator):
+def test_collaborator_get_fields_create_includes_password_for_admin(seed_data_collaborator):
+    """
+    Pour un admin en contexte 'create', le champ 'password' doit être présent.
+    """
     user = seed_data_collaborator["admin"]
-    fields = EntityController.get_model_fields(Collaborator, user, instance=user)
-    assert any(f[0] == "password" for f in fields)
-
+    fields = Collaborator.get_fields(user.role, "create")
+    assert any(f[0] == "password" for f in fields), "Le champ password doit apparaître en 'create' pour admin."
 
 # ---------- Integration Test: EntityController list_entity Filtering ----------
 def test_list_entity_contract_filters_commercial(seed_data_collaborator, db_session):
@@ -87,7 +95,7 @@ def test_list_entity_event_filters_support(seed_data_collaborator, db_session):
     user = seed_data_collaborator["support"]
     entity = "event"
     ec.views[entity].display_entity_list = MagicMock()
-    result = ec.list_entity(db_session, entity, user, purpose="update")
+    result = ec.list_entity(db_session, entity, user, purpose="modify")
     assert result in [None, "aucun \u00e9l\u00e9ment disponible"]
 
 

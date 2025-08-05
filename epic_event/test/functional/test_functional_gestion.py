@@ -13,7 +13,7 @@ def expect_prompt(child, prompt_text):
 
 def init_programme():
     child = pexpect.popen_spawn.PopenSpawn(
-        "python main.py test",
+        "python main.py demo",
         encoding="cp1252",
         timeout=10
     )
@@ -24,9 +24,9 @@ def init_programme():
 def gestion_connexion(child):
     child.sendline("1")
     child.expect("Nom d'utilisateur")
-    child.sendline("Alice")
+    child.sendline("Alice Martin")
     child.expect("Password")
-    child.sendline("mypassword")
+    child.sendline("alicepass")
 
 
 def test_gestion_create_collaborator(db_session):

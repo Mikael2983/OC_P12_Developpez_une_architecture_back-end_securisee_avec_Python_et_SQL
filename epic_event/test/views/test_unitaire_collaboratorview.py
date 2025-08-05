@@ -40,13 +40,6 @@ def view_without_archived(mock_session_hide_archived):
     return CollaboratorView(SESSION=mock_session_hide_archived)
 
 
-# === Test de mapping ===
-def test_mapping_keys(view_with_archived):
-    assert isinstance(view_with_archived.mapping, dict)
-    assert view_with_archived.mapping["1"] == ["id", "Id"]
-    assert view_with_archived.mapping["4"] == ["role", "Service"]
-
-
 # === Tests de display_entity_list ===
 # === Sans archivés ===
 @patch("rich.console.Console.print")

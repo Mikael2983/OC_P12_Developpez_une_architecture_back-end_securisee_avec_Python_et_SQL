@@ -13,7 +13,7 @@ def expect_prompt(child, prompt_text):
 
 def init_programme():
     child = pexpect.popen_spawn.PopenSpawn(
-        "python main.py test ",
+        "python main.py demo ",
         encoding="cp1252",
         timeout=10
     )
@@ -30,28 +30,30 @@ def admin_connexion(child):
 
 
 def test_admin_create_collaborator(db_session):
-    # Lance le programme
+    # the administrator starts the application
 
     child = init_programme()
 
-    # Étape 1 : Accueil
+    # he sees the home menu
     child.expect("1- Se connecter")
     child.expect("2- Quitter")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Connexion
+    # he connects to his account
     admin_connexion(child)
 
-    # Menu entité
+    # he sees the entities menu
     child.expect("1. Collaborateur")
     child.expect("2. Client")
     child.expect("3. Contrat")
     child.expect("4. Événement")
     child.expect("5. Déconnexion")
     expect_prompt(child, "Sélectionnez une option:")
-    # Aller dans Collaborateur
+
+    # he selects the Collaborator
     child.sendline("1")
 
+    # he sees the collaborator menu
     child.expect("1. Afficher les détails")
     child.expect("2. Créer un nouveau collaborateur")
     child.expect("3. Modifier un collaborateur")
@@ -59,9 +61,11 @@ def test_admin_create_collaborator(db_session):
     child.expect("5. Afficher les archives")
     child.expect("6. Retour")
     expect_prompt(child, "Sélectionnez une option:")
-    # Créer un collaborateur
+
+    # he wants to create a new collaborator
     child.sendline("2")
 
+    # he sees the different attributes to fill
     child.expect("Nom")
     child.sendline("Jean Dupont")
     child.expect("Mot de passe")
@@ -71,85 +75,89 @@ def test_admin_create_collaborator(db_session):
     child.expect("Service")
     child.sendline("commercial")
 
+    # all attributes are validated and collaborator is created
     expect_prompt(child, "créé avec succès.")
     expect_prompt(child, "appuyer sur une touche pour continuer")
 
-    # Retour au menu principal
+    # and returns to the collaborator’s menu
     child.sendline("")
     child.sendline("6")
     child.expect("1. Collaborateur")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Déconnexion
+    # the administrator disconnects
     child.sendline("5")
     child.expect("1- Se connecter")
     child.expect("2. Quitter")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Quitter
+    # and quit the application
     child.sendline("2")
     child.expect(pexpect.EOF)
 
 
 def test_admin_modify_collaborator(db_session):
-    # Lance le programme
+    # the administrator starts the application
 
     child = init_programme()
 
-    # Étape 1 : Accueil
+    # he sees the home menu
     child.expect("1- Se connecter")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Connexion
+    # he conneccts to his account
     admin_connexion(child)
 
-    # Menu entité
+    # he sees the entities menu
     child.expect("1. Collaborateur")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Aller dans menu collaborateurs admin
+    # he selects the collaborator menu
     child.sendline("1")
 
+    # he sees the collaborator menu
     child.expect("3. Modifier un collaborateur")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Modifier un collaborateur
+    # he wants to modify a collaborator
     child.sendline("3")
 
-    # sélectionner un collaborateur
+    # he selects a collaborator
     expect_prompt(child, "id du collaborateur")
-    child.sendline("4")
+    child.sendline("5")
 
-    # sélectionner un champ
+    # and sees the list of attributes that he can update
     expect_prompt(child, "Sélectionnez le champs à modifier")
     child.expect("1. Nom")
-    child.expect("2. Mot de passe")
-    child.expect("3. Email")
-    child.expect("4. Service")
-    child.expect("5. Archivé")
-    child.expect("6. Retour")
-    child.expect("7. Enregistrer")
+    child.expect("2. Email")
+    child.expect("3. Service")
+    child.expect("4. Archivé")
+    child.expect("5. Retour")
+    child.expect("6. Enregistrer")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # sélection du champ Nom
+    # he selects the field full_Name
     child.sendline("1")
     child.expect("veuillez renseigner Nom")
 
-    child.sendline("Dup")
+    # he enters the new data for the field not validate
+    child.sendline("Alice Martin")
     expect_prompt(child, "This full name is already in use.")
 
-    # child.sendline("Robert")
+    # he enters new good data for the field name
     child.sendline("1")
     child.expect("veuillez renseigner Nom")
-    child.sendline("Robert")
+    child.sendline("Robert Dupont")
 
+    # the new attribute is validated and collaborator is update
     expect_prompt(child, "a été mis à jour (non sauvegardé)")
     expect_prompt(child, "appuyer sur une touche pour continuer")
     child.sendline("")
 
-    # Retour au menu collaborateur admin
+    # he saves the change
+    child.sendline("6")
 
-    child.sendline("7")
+    # and returns to the collaborator’s menu
     child.expect("1. Afficher les détails")
     child.expect("2. Créer un nouveau collaborateur")
     child.expect("3. Modifier un collaborateur")
@@ -158,41 +166,42 @@ def test_admin_modify_collaborator(db_session):
     child.expect("6. Retour")
     expect_prompt(child, "Sélectionnez une option:")
 
+    # and returns to the home’s menu
     child.sendline("6")
     child.expect("1. Collaborateur")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Déconnexion
+    # he disconnects
     child.sendline("5")
     child.expect("1- Se connecter")
     child.expect("2. Quitter")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Quitter
+    # and close the application
     child.sendline("2")
     child.expect(pexpect.EOF)
 
 
 def test_admin_delete_collaborator(db_session):
-    # Lance le programme
+    # the administrator starts the application
 
     child = init_programme()
 
-    # Étape 1 : Accueil
+    # he sees the home menu
     child.expect("1- Se connecter")
-    child.expect("2- Quitter")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Connexion
+    # he conneccts to his account
     admin_connexion(child)
 
-    # Menu entité
+    # he sees the entities menu
     child.expect("1. Collaborateur")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Aller dans menu collaborateurs admin
+    # he selects the collaborator menu
     child.sendline("1")
 
+    # he sees the collaborator menu
     child.expect("5. Afficher les archives")
     child.expect("6. Retour")
     expect_prompt(child, "Sélectionnez une option:")
@@ -232,18 +241,16 @@ def test_admin_delete_collaborator(db_session):
 
 
 def test_admin_create_client(db_session, seed_data_collaborator):
-    # Lance le programme
+    # the administrator starts the application
 
     child = init_programme()
-
     commercial = seed_data_collaborator["commercial"]
 
-    # Étape 1 : Accueil
+    # he sees the home menu
     child.expect("1- Se connecter")
-    child.expect("2- Quitter")
     expect_prompt(child, "Sélectionnez une option:")
 
-    # Connexion
+    # he conneccts to his account
     admin_connexion(child)
 
     # Menu entité
@@ -372,7 +379,7 @@ def test_admin_create_event(db_session, seed_data_contract):
     # Créer un contrat
     child.sendline("2")
 
-    child.expect("Id du Contract")
+    child.expect("N° du Contrat")
     child.sendline(str(contract.id))
     child.expect("Titre")
     child.sendline("anniversaire 50ans")
@@ -382,7 +389,7 @@ def test_admin_create_event(db_session, seed_data_contract):
     child.sendline("25-09-2025 21:00")
     child.expect("Lieu")
     child.sendline("Lieu test")
-    child.expect("Participants")
+    child.expect("Nombre de participants")
     child.sendline("200")
     child.expect("Notes")
     child.sendline("exemple de notes")

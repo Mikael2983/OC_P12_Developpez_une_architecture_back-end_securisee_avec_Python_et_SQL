@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from epic_event.controllers.maincontroller import MainController
+from epic_event.controllers.main_controller import MainController
 
 
 @pytest.fixture
@@ -26,8 +26,8 @@ def mock_user():
 @pytest.fixture
 def controller(mock_session, mock_sqlalchemy_session):
     with patch("epic_event.views.application_view.ApplicationView"), \
-            patch("epic_event.controllers.entitycontroller.EntityController"), \
-            patch("epic_event.controllers.usercontroller.UserController"), \
+            patch("epic_event.controllers.entity_controller.EntityController"), \
+            patch("epic_event.controllers.user_controller.UserController"), \
             patch("epic_event.views.client_view.ClientView"), \
             patch("epic_event.views.collaborator_view.CollaboratorView"), \
             patch("epic_event.views.contract_view.ContractView"), \
@@ -49,21 +49,24 @@ def test_run_valid_login_flow(controller):
                       side_effect=["1", "5", "2"]) as mock_choice, \
             patch.object(
                 controller.user_controller,
-                "connexion") as mock_handle_connection:
+                "connexion") as mock_handle_connection, \
+            patch.object(controller.app_view,
+                         "choose_field",
+                         side_effect=[5]) as mock_field:
         controller.run()
-        mock_handle_connection.assert_called_once()
-        assert mock_choice.call_count == 3
+    mock_handle_connection.assert_called_once()
+    assert mock_choice.call_count == 3
 
 
 def test_handle_entity_action_valid_entity(controller, mock_user):
-    with patch.object(controller.app_view, "choose_option",
-                      side_effect=["1", "5"]), \
+    # 0 = "collaborator", 4 = sortie
+    with patch.object(controller.app_view, "choose_field", side_effect=[0, 4]), \
             patch.object(controller,
                          "handle_user_role_action") as mock_handle_user_role_action:
         controller.handle_entity_action(mock_user)
 
-        mock_handle_user_role_action.assert_called_with(mock_user,
-                                                        "collaborator")
+        mock_handle_user_role_action.assert_called_once_with(mock_user,
+                                                             "collaborator")
 
 
 def test_handle_user_role_action_invokes_correct_action(controller, mock_user):
@@ -100,19 +103,24 @@ def test_handle_user_role_action_invalid_role(controller, mock_user):
             "Rôle utilisateur non pris en charge : unauthorized")
 
 
-def test_details_entity_calls_subactions(controller, mock_user):
-    mock_user.role = "admin"
-    mock_user.full_name = "Admin User"
+def test_details_entity_calls_subactions(controller, seed_data_collaborator):
+    user = seed_data_collaborator["admin"]
 
     with patch.object(controller.app_view, "choose_option",
                       side_effect=["3", "4"]), \
             patch.object(controller.entity_controller,
                          "show_details_entity") as mock_show_details_entity, \
             patch.object(controller.app_view, "break_point"):
-        controller.details_entity(mock_user, 'client')
+        controller.details_entity(user, 'client')
 
-        args, kwargs = mock_show_details_entity.call_args
-        assert args[1] == "client"
+        assert mock_show_details_entity.called, "show_details_entity n'a pas été appelé."
+        called_args, called_kwargs = mock_show_details_entity.call_args
+
+        assert called_args[0] is user
+
+        assert len(called_args) >= 3 and called_args[2] == "client", (
+            f"'client' attendu en position 2, obtenu {called_args!r}"
+        )
 
 
 def test_show_archived_toggle(controller):
