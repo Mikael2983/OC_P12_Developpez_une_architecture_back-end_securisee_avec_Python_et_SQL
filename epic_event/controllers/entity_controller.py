@@ -32,14 +32,14 @@ interactions between the command line user, business logic and database.
 import inspect
 from typing import Union
 
-from epic_event.controllers.clientcontroller import ClientController
-from epic_event.controllers.collaboratorcontroller import \
-    CollaboratorController
-from epic_event.controllers.contractcontroller import ContractController
-from epic_event.controllers.eventcontroller import EventController
+from sqlalchemy.orm import Session
 
+from epic_event.controllers.client_controller import ClientController
+from epic_event.controllers.collaborator_controller import \
+    CollaboratorController
+from epic_event.controllers.contract_controller import ContractController
+from epic_event.controllers.event_controller import EventController
 from epic_event.models import Client, Collaborator, Contract, Event
-from epic_event.models.db_model import Session
 from epic_event.permission import has_object_permission
 from epic_event.views.application_view import ApplicationView
 from epic_event.views.client_view import ClientView
@@ -77,87 +77,23 @@ class EntityController:
         self.app_view = ApplicationView(self.SESSION)
 
     @staticmethod
-    def get_model(entity_name: str):
+    def get_model(entity_name: str
+                  ) -> Union[Client, Collaborator, Contract, Event]:
         """
         Return the model class based on the entity name.
         Args:
             entity_name (str): Name of the entity Keys of entities.
+        Returns: ORM Model
         """
 
         return eval(entity_name.capitalize())
 
     @staticmethod
-    def get_model_fields(
-            Model: Union[Collaborator, Client, Contract, Event],
-            user: Collaborator,
-            instance: Union[Collaborator, Client, Contract, Event] = None
-    ) -> list[list]:
-        """
-        Return editable fields for a model depending on the user's role and
-        the entity type.
-        for each Model and depending on the user’s role, the dictionary
-        returns either a list of fields to be extracted from the list of
-        editable fields or by default of role, the List of pairs
-        [field, translation] that can be modified by the user.
-        List of pairs [field, translation] representing field names (as in ORM
-        model) and their user label in French.
-
-        Args:
-            Model: one ORM Models (Collaborator, Client, Contract or Event).
-            user: one instance of Collaborator, connected user
-            instance: one instance of one ORM Models
-        Returns :
-            fields: A list of editable fields, as [field, translation] pairs.
-       """
-        all_fields = Model.get_field()
-        model_name = Model.__name__
-        role = user.role
-
-        excepted_fields = {
-            "Collaborator": {
-                "admin": ["id"],
-                "gestion": ["id", "password", "archived"],
-                "default": [["password", "mot de passe"]],
-            },
-            "Client": {
-                "admin": ["id", "created_date"],
-                "commercial": ["id", "created_date", "archived",
-                               "id_Commercial"],
-                "default": [],
-            },
-            "Contract": {
-                "admin": ["id", "created_date"],
-                "gestion": ["id", "archived", "created_date"],
-                "default": [],
-            },
-            "Event": {
-                "admin": ["id", "contract_id"],
-                "support": ["id", "contract_id", "archived", "support_id"],
-                "gestion": [["support_id", "Id de l'organisateur"]],
-                "default": [],
-            },
-        }
-
-        model_rules = excepted_fields.get(model_name, {})
-
-        if instance:
-            rule = model_rules.get(role, model_rules.get("default", []))
-
-            if rule and isinstance(rule[0], list):
-                return rule
-        else:
-            rule = ["archived", "id", "created_date", "support_id"]
-
-        fields = [field for field in all_fields if
-                  field[0] not in rule]
-
-        if instance == user and user.role in ["admin", "gestion"]:
-            fields.insert(1, ["password", "Mot de passe"])
-
-        return fields
-
-    @staticmethod
-    def validate_field(Model, field, session, user, data):
+    def validate_field(Model: Union[Client, Collaborator, Contract, Event],
+                       field: list[str],
+                       session: Session,
+                       user: Collaborator,
+                       data: dict) -> Union[tuple[str, None], tuple[None,str]]:
         """
         Validate a field's value using the model's custom validation method
         if it exists.
@@ -204,18 +140,18 @@ class EntityController:
     ) -> str | None:
         """
         Display a list of entities, filtered by user role and intent (view or
-         update).
+         modify).
 
         This method merges both listing and update-specific entity filtering
         rules.
         Rules vary depending on the entity, user role, and purpose
-        ('list' or 'update').
+        ('list' or 'modify').
 
         Args:
             session (Session): SQLAlchemy session.
             entity_name (str): Name of the entity to display (e.g., 'clients').
             user (Collaborator, optional): Connected user.
-            purpose (str): Either 'list' (default) or 'update' to apply
+            purpose (str): Either 'list' (default) or 'modify' to apply
                 stricter filters.
 
         Returns:
@@ -244,10 +180,9 @@ class EntityController:
 
                     filters = {"support_id": None}
 
-            elif purpose == "update":
+            elif purpose == "modify":
                 if (entity_name == "collaborator"
                         and role not in ["admin", "gestion"]):
-
                     filters = {"id": user.id}
 
                 elif entity_name == "client":
@@ -269,7 +204,7 @@ class EntityController:
         model_view.display_entity_list(items)
         return error
 
-    def filter_by_field_entity(self, session, entity_name, **kwargs):
+    def filter_by_field_entity(self, user, session, entity_name, **kwargs):
         """
         Filter and display a list of entities based on a selected field and value.
 
@@ -278,6 +213,7 @@ class EntityController:
         The resulting filtered list is then displayed to the user.
 
         Args:
+            user (Collaborator): the connected user
             session (Session): SQLAlchemy session object.
             entity_name (str): The name of the entity to filter.
 
@@ -286,12 +222,21 @@ class EntityController:
         """
         Model = self.get_model(entity_name)
         model_view = self.views[entity_name]
+        entity_fields = Model.get_fields(user.role, "list")
 
         self.app_view.clear_console()
         self.list_entity(session, entity_name)
-        self.app_view.display_dict_field_choice_menu(model_view.mapping)
-        field, value = self.app_view.ask_filter_field_and_value(
-            model_view.mapping)
+        self.app_view.display_list_field_menu(entity_fields, "filter")
+        choice = self.app_view.choose_field()
+
+        try:
+            asked_field = entity_fields[choice]
+        except (TypeError, IndexError):
+            self.app_view.display_error_message("Champ invalide.")
+            return
+
+        field, value = self.app_view.ask_filter_value(
+            asked_field)
 
         if field and value:
             items = Model.filter_by_fields(session,
@@ -301,7 +246,7 @@ class EntityController:
             model_view.display_entity_list(items)
             self.app_view.break_point()
 
-    def order_by_field_entity(self, session, entity_name, **kwargs):
+    def order_by_field_entity(self, user, session, entity_name, **kwargs):
         """
         Display entity list ordered by a selected field.
 
@@ -310,6 +255,7 @@ class EntityController:
         sorted list of entities based on that field.
 
         Args:
+            user (Collaborator): The connected user
             session (Session): SQLAlchemy session object.
             entity_name (str): The name of the entity to sort (e.g., 'contracts').
 
@@ -318,16 +264,23 @@ class EntityController:
         """
         Model = self.get_model(entity_name)
         model_view = self.views[entity_name]
+        fields = Model.get_fields(user.role, "list")
 
         self.app_view.clear_console()
         self.list_entity(session, entity_name)
-        self.app_view.display_dict_field_choice_menu(model_view.mapping)
-        field_choice = self.app_view.choose_option()
-        field_name = model_view.mapping.get(field_choice)
 
-        if field_name:
+        self.app_view.display_list_field_menu(fields, "order")
+        choice = self.app_view.choose_field()
+
+        try:
+            asked_field = fields[choice]
+        except (TypeError, IndexError):
+            self.app_view.display_error_message("Champ invalide.")
+            return
+
+        if asked_field:
             descending = self.app_view.ask_descending_order()
-            items = Model.order_by_fields(session, field_name[0], descending)
+            items = Model.order_by_fields(session, asked_field[0], descending)
             self.app_view.clear_console()
             model_view.display_entity_list(items)
             self.app_view.break_point()
@@ -353,7 +306,7 @@ class EntityController:
         self.app_view.clear_console()
         Model = self.get_model(entity_name)
         model_controller = self.controllers[entity_name]
-        fields = self.get_model_fields(Model, user)
+        fields = Model.get_fields(user.role, "create")
         data = {}
 
         for field in fields:
@@ -424,7 +377,7 @@ class EntityController:
             session,
             entity_name,
             user,
-            "update"
+            "modify"
         )
 
         if error:
@@ -453,19 +406,24 @@ class EntityController:
                 continue
             break
 
-        fields = self.get_model_fields(Model, user, entity)
+        fields = Model.get_fields(user.role, "modify")
+        if entity == user:
+            if user.role in ["admin", "gestion"]:
+                fields.insert(1, ["password", "Mot de passe"])
+            else:
+                fields.append(["password", "Mot de passe"])
 
         data = {field[0]: getattr(entity, field[0]) for field in fields}
 
         while True:
             self.app_view.clear_console()
             model_view.display_entity_list([entity])
-            self.app_view.display_list_field_choice_menu(fields)
-            choice = self.app_view.choose_option()
+            self.app_view.display_modify_field_menu(fields)
+            choice = self.app_view.choose_field()
 
-            if int(choice) <= len(fields):
-                index = int(choice) - 1
-                field = fields[index]
+            if choice < len(fields):  # a selected field from the menu
+
+                field = fields[choice]
 
                 # displays the specific table to guide the user’s choice.
                 dict_ref_entity = {
@@ -495,11 +453,11 @@ class EntityController:
                 else:
                     self.app_view.display_error_message(error)
 
-            if int(choice) == len(fields) + 1:
+            if int(choice) == len(fields):  # the cancel option from the menu
                 session.refresh(entity)
                 break
 
-            elif int(choice) == len(fields) + 2:
+            elif int(choice) == len(fields) + 1:   # the save option from the menu
                 response = entity.update(session)
 
                 if response == "success":
@@ -572,12 +530,13 @@ class EntityController:
             else:
                 break
 
-    def show_details_entity(self, session, entity_name, **kwargs):
+    def show_details_entity(self, user, session, entity_name, **kwargs):
         """
         Display a single entity instance along with its related entities (if any).
         Automatically detects relationships and calls appropriate view.
 
         Args:
+            user (Collaborator): the connected user
             session (Session): SQLAlchemy session object.
             entity_name (str): The name of the entity to show details (e.g., 'clients').
 
