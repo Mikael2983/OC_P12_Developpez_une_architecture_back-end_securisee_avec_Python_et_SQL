@@ -259,7 +259,7 @@ class ApplicationView:
             str: The entered ID or empty string to go back.
         """
         name = translate_entity[entity_name]
-        message = f"entrer l'id du {name} (taper 'enter' pour revenir) :"
+        message = f"entrer l'id du {name} (taper 'enter' pour revenir):"
         return self.console.input(
             self.utils_view.apply_rich_style(
                 message,
