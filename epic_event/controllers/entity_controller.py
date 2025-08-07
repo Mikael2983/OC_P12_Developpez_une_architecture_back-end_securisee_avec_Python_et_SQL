@@ -506,6 +506,13 @@ class EntityController:
                 continue
 
             instance = instances[0]
+            if not has_object_permission(user, "delete",instance):
+                name = translate_entity[entity_name]
+                self.app_view.display_error_message(
+                    f"Vous n'avez pas l'autorisation de supprimer ce {name}")
+                self.app_view.break_point()
+                continue
+
             model_view.display_entity_list([instance])
 
             if user.role == "admin":
@@ -571,6 +578,7 @@ class EntityController:
                 "client": self.views["client"],
                 "contract": self.views["contract"],
                 "support": self.views["collaborator"],
+
             }
 
             for attr_name, view in related_map.items():
