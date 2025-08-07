@@ -39,7 +39,7 @@ Repository/
     │   ├── controllers/        # Coordination logic between models and views
     │   ├── models/             # ORM SQLAlchemy 
     │   ├── views/              # Presentation layer  
-    │   ├── tests/              # Tests Selenium & Pytest
+    │   ├── tests/              # Tests Pexpect & Pytest
     │   ├── permission.py       # Management of permissions and roles
     │   └── settings.py         # Configuration parameters (DB, constants, logger)
     ├── main.py                 # Entry point of the application
