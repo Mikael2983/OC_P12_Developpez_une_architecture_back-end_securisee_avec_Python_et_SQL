@@ -346,7 +346,7 @@ class EntityController:
         if response == "success":
 
             self.app_view.display_success_message(
-                f"{entity_name} créé avec succès.")
+                f"{translate_entity[entity_name]} créé avec succès.")
         else:
             self.app_view.display_error_message(response)
 
