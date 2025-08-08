@@ -61,13 +61,13 @@ class CollaboratorView:
         table.add_column(
             "Nom",
             justify="center",
-            style=SUCCESS_STYLE,
+            style=TEXT_STYLE,
             max_width=25
         )
         table.add_column(
             "email",
             justify="center",
-            style=SUCCESS_STYLE,
+            style=TEXT_STYLE,
             max_width=30
         )
         table.add_column(
