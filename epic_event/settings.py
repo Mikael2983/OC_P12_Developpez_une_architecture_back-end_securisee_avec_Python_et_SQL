@@ -37,25 +37,25 @@ SENTRY_DSN = "https://422a046974326b3d65c42157b707bdc2@o4509643092721664.ingest.
 
 LOGGING_CONFIG = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
         'verbose': {
             'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
         },
     },
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-            'level': 'INFO',
-        },
+        # 'console': {
+        #     'class': 'logging.StreamHandler',
+        #     'formatter': 'verbose',
+        #     'level': 'INFO',
+        # },
         'sentry': {
             'level': 'INFO',
             'class': 'sentry_sdk.integrations.logging.EventHandler',
         },
     },
     'root': {
-        'handlers': ['console', 'sentry'],
+        'handlers': ['sentry'],
         'level': 'INFO',
     },
 }
