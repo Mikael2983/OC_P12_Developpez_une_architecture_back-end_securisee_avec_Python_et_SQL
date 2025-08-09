@@ -506,7 +506,7 @@ class EntityController:
                 continue
 
             instance = instances[0]
-            if not has_object_permission(user, "delete",instance):
+            if not has_object_permission(user, "delete", instance):
                 name = translate_entity[entity_name]
                 self.app_view.display_error_message(
                     f"Vous n'avez pas l'autorisation de supprimer ce {name}")
@@ -589,6 +589,10 @@ class EntityController:
                             view.display_entity_list(related_data)
                         else:
                             view.display_entity_list([related_data])
+
+            if entity_name == "event":
+                client = instance.contract.client
+                self.views["client"].display_entity_list([client])
 
             self.app_view.break_point()
             break
