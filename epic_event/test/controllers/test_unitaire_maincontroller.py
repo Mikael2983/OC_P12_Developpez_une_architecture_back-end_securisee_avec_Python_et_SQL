@@ -82,7 +82,7 @@ def test_handle_user_role_action_invokes_correct_action(controller, mock_user):
             patch.object(controller.entity_controller,
                          "show_details_entity") as mock_details, \
             patch.object(controller.entity_controller, "create_entity"), \
-            patch.object(controller.app_view, "display_menu_role"), \
+            patch.object(controller.app_view, "display_entity_menu_role"), \
             patch.object(controller.app_view, "ask_id", side_effect=["1"]), \
             patch.object(
                 controller.app_view,

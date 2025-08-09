@@ -103,6 +103,9 @@ def test_delete_entity_archives_non_admin(entity_controller, session,
                          side_effect=["1", None]), \
             patch.object(controller.app_view, "valide_choice_menu",
                          return_value=True), \
+            patch(
+                "epic_event.controllers.entity_controller.has_object_permission",
+                return_value=True), \
             patch.object(controller.app_view, "display_success_message"), \
             patch.object(controller.app_view, "break_point"):
         controller.delete_entity(session, mock_user, "client")
