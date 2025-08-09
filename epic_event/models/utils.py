@@ -185,9 +185,9 @@ def load_data_in_database(session: Session):
 
             Event(title="Séminaire Alpha",
                   start_date=datetime.strptime(
-                      "28-06-2025 08:30", "%d-%m-%Y %H:%M"),
+                      "08-08-2025 08:30", "%d-%m-%Y %H:%M"),
                   end_date=datetime.strptime(
-                      "30-06-2025 17:30", "%d-%m-%Y %H:%M"),
+                      "10-08-2025 17:30", "%d-%m-%Y %H:%M"),
                   location="Bordeaux", participants=100,
                   notes="Retour très positif.",
                   contract_id=contracts[2].id,
@@ -195,10 +195,10 @@ def load_data_in_database(session: Session):
 
             Event(title="Forum Digital",
                   start_date=datetime.strptime(
-                      "23-07-2025 09:00", "%d-%m-%Y %H:%M"
+                      "23-08-2025 09:00", "%d-%m-%Y %H:%M"
                   ),
                   end_date=datetime.strptime(
-                      "24-07-2025 17:00", "%d-%m-%Y %H:%M"
+                      "24-08-2025 17:00", "%d-%m-%Y %H:%M"
                   ),
                   location="Marseille", participants=80,
                   notes="Préparation en cours.",
@@ -207,10 +207,10 @@ def load_data_in_database(session: Session):
 
             Event(title="Atelier Startups",
                   start_date=datetime.strptime(
-                      "28-07-2025 14:00", "%d-%m-%Y %H:%M"
+                      "28-09-2025 14:00", "%d-%m-%Y %H:%M"
                   ),
                   end_date=datetime.strptime(
-                      "29-07-2025 18:00", "%d-%m-%Y %H:%M"
+                      "29-09-2025 18:00", "%d-%m-%Y %H:%M"
                   ),
                   location="Nice", participants=120,
                   notes="Inscription ouverte.",
