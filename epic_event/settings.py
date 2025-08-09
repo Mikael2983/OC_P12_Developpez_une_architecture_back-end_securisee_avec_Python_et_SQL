@@ -37,7 +37,7 @@ SENTRY_DSN = "https://422a046974326b3d65c42157b707bdc2@o4509643092721664.ingest.
 
 LOGGING_CONFIG = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
@@ -60,8 +60,6 @@ LOGGING_CONFIG = {
     },
 }
 
-DB_PATH = "sqlite:///epic_events.db"
-
 SERVICES = ["gestion", "commercial", "support"]
 SESSION = {"show_archived": False}
 
@@ -72,6 +70,7 @@ SUCCESS_STYLE = "green"
 TEXT_STYLE = "#77DFFE"
 REQUEST_STYLE = "yellow"
 INFORMATION_STYLE = "magenta"
+
 
 def setup_logging():
     logging.config.dictConfig(LOGGING_CONFIG)
