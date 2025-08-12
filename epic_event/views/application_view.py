@@ -2,6 +2,7 @@
 Module for managing user interface display and input for an event management
  CLI application.
  """
+import getpass
 from rich.console import Console
 from rich import print
 
@@ -51,11 +52,10 @@ class ApplicationView:
                 TEXT_STYLE
             ))
 
-        password = self.console.input(
-            self.utils_view.apply_rich_style(
-                "Password :",
-                TEXT_STYLE
-            ))
+        print(self.utils_view.apply_rich_style(
+            "Password :", TEXT_STYLE))
+        password = getpass.getpass(prompt="")
+
         return username, password
 
     def choose_option(self) -> str:
