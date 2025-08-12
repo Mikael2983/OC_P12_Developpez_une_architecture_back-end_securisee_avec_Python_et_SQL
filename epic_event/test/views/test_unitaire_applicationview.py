@@ -3,7 +3,6 @@ from unittest.mock import patch, MagicMock
 from epic_event.views.application_view import ApplicationView
 
 
-
 @pytest.fixture
 def mock_session():
     return {"show_archived": False}
@@ -12,6 +11,7 @@ def mock_session():
 @pytest.fixture
 def app_view(mock_session):
     return ApplicationView(SESSION=mock_session)
+
 
 # === Tests des menu ===
 def test_display_home_menu(app_view):
@@ -28,7 +28,7 @@ def test_display_entity_menu(app_view):
 
 def test_display_menu_details(app_view):
     app_view.utils_view.display_styled_menu = MagicMock()
-    app_view.display_menu_details("client")
+    app_view.display_menu_details()
     app_view.utils_view.display_styled_menu.assert_called_once()
 
 

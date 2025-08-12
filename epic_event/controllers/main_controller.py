@@ -182,7 +182,7 @@ class MainController:
 
             try:
                 int(choice)
-            except:
+            except ValueError:
                 continue
 
             if int(choice) > len(options):
@@ -220,15 +220,18 @@ class MainController:
             entity_name (str): Name of the entity concerned.
         """
         menu_details = {
-            "1": lambda: self.entity_controller.filter_by_field_entity(user,
-                                                                       self.session,
-                                                                       entity_name),
-            "2": lambda: self.entity_controller.order_by_field_entity(user,
-                                                                      self.session,
-                                                                      entity_name),
-            "3": lambda: self.entity_controller.show_details_entity(user,
-                                                                    self.session,
-                                                                    entity_name),
+            "1": lambda: self.entity_controller.filter_by_field_entity(
+                user,
+                self.session,
+                entity_name),
+            "2": lambda: self.entity_controller.order_by_field_entity(
+                user,
+                self.session,
+                entity_name),
+            "3": lambda: self.entity_controller.show_details_entity(
+                user,
+                self.session,
+                entity_name),
             "4": "Retour"
         }
         while True:
@@ -240,7 +243,7 @@ class MainController:
                 entity_name
             )
 
-            self.app_view.display_menu_details(entity_name)
+            self.app_view.display_menu_details()
             choice = self.app_view.choose_option()
 
             action = menu_details.get(choice)

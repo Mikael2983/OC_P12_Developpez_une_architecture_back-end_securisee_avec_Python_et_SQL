@@ -88,7 +88,7 @@ class ApplicationView:
                 choice = int(choice)
                 break
 
-            except:
+            except ValueError:
                 self.display_error_message("saisie non valide")
                 continue
 
@@ -230,12 +230,10 @@ class ApplicationView:
 
         self.utils_view.display_styled_menu(header, request, text)
 
-    def display_menu_details(self, entity_name):
+    def display_menu_details(self):
         """
         Display detail menu options for a given entity.
 
-        Args:
-            entity_name (str): The name of the entity to display details for.
         """
         header = f"--- Menu détails ---"
         request = "Sélectionnez une option:"

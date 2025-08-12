@@ -11,7 +11,7 @@ class EventView:
         self.console = Console()
         self.mapping = {
             "1": ["id", "Id"],
-            "2": ["title","titre"],
+            "2": ["title", "titre"],
             "3": ["start_date", "date de début"],
             "4": ["end_date", "date de fin"],
             "5": ["location", "lieu"],

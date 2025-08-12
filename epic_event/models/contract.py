@@ -144,8 +144,8 @@ class Contract(Base, Entity):
         return signed, None
 
     @staticmethod
-    def validate_total_amount(total_amount: str) -> tuple[None, str] | tuple[
-        str, None]:
+    def validate_total_amount(total_amount: str) -> (
+            tuple[None, str] | tuple[str, None]):
         """
         Validate total and due amounts.
 

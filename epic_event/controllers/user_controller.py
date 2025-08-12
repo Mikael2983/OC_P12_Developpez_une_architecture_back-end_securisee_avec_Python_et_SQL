@@ -35,7 +35,7 @@ class UserController:
         Authenticate the user by checking credentials from the input menu.
 
         Prompts the user for their full name and password, and checks them
-        against stored data. If authentication fails, displays an error message.
+        against stored data. If authentication fails, displays an error message
 
         Args:
             session (Session): SQLAlchemy database session.
@@ -45,7 +45,9 @@ class UserController:
                                  or None if authentication fails.
         """
         username, password = self.app_view.display_connection_menu()
-        user = session.query(Collaborator).filter_by(full_name=username).first()
+        user = session.query(Collaborator).filter_by(
+            full_name=username
+        ).first()
         if user:
             if user.check_password(password):
                 return user

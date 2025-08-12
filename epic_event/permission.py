@@ -75,7 +75,6 @@ def has_object_permission(user: Collaborator,
     Args:
         user: The user.
         action: The requested action ('create', 'update', 'delete').
-        entity_name: Name of the entity.
         item: Object (optional) to which the action relates.
 
     Returns:

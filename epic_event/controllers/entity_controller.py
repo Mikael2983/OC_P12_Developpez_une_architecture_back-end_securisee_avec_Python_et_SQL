@@ -93,7 +93,7 @@ class EntityController:
                        field: list[str],
                        session: Session,
                        user: Collaborator,
-                       data: dict) -> Union[tuple[str, None], tuple[None,str]]:
+                       data: dict) -> Union[tuple[str, None], tuple[None, str]]:
         """
         Validate a field's value using the model's custom validation method
         if it exists.
@@ -206,7 +206,8 @@ class EntityController:
 
     def filter_by_field_entity(self, user, session, entity_name, **kwargs):
         """
-        Filter and display a list of entities based on a selected field and value.
+        Filter and display a list of entities based on a selected field and
+        value.
 
         Prompts the user to select a field from the model's mapping and enter
         a filter value.
@@ -218,7 +219,8 @@ class EntityController:
             entity_name (str): The name of the entity to filter.
 
         Side Effects:
-            Prompts for input, displays the filtered list, and pauses the interface.
+            Prompts for input, displays the filtered list, and pauses the
+            interface.
         """
         Model = self.get_model(entity_name)
         model_view = self.views[entity_name]
@@ -257,10 +259,12 @@ class EntityController:
         Args:
             user (Collaborator): The connected user
             session (Session): SQLAlchemy session object.
-            entity_name (str): The name of the entity to sort (e.g., 'contracts').
+            entity_name (str): The name of the entity to sort
+            (e.g., 'contracts').
 
         Side Effects:
-            Clears the console, prompts user input, and displays the sorted entity list.
+            Clears the console, prompts user input, and displays the sorted
+            entity list.
         """
         Model = self.get_model(entity_name)
         model_view = self.views[entity_name]
@@ -297,7 +301,8 @@ class EntityController:
             Args:
                 session (Session): SQLAlchemy session object.
                 user (Collaborator): The currently authenticated user.
-                entity_name (str): The name of the entity to create (e.g., 'contracts').
+                entity_name (str): The name of the entity to create
+                (e.g., 'contracts').
 
             Side Effects:
                 Prompts user for input, displays errors or confirmation,
@@ -462,7 +467,8 @@ class EntityController:
 
                 if response == "success":
                     self.app_view.display_success_message(
-                        f"{translate_entity[entity_name]} a été enregistré avec succès.")
+                        f"{translate_entity[entity_name]} a été enregistré "
+                        f"avec succès.")
                 else:
                     self.app_view.display_error_message(response)
                     continue
@@ -472,20 +478,24 @@ class EntityController:
         """
         Delete or archive an entity instance based on user role.
 
-        If the user is an admin, the entity is permanently deleted from the database.
+        If the user is an admin, the entity is permanently deleted from the
+        database.
         Otherwise, the entity is marked as archived.
-        Before deletion, the method confirms the target entity exists and displays it.
+        Before deletion, the method confirms the target entity exists and
+        displays it.
 
         Args:
             session (Session): SQLAlchemy session object.
             user (Collaborator): The currently authenticated user.
-            entity_name (str): The name of the entity to delete (e.g., 'clients').
+            entity_name (str): The name of the entity to delete
+            (e.g., 'clients').
 
         Raises:
             IntegrityError: If a database constraint prevents deletion.
 
         Side Effects:
-            Displays entity information, confirmation prompts, and success or error messages.
+            Displays entity information, confirmation prompts, and success or
+            error messages.
             Commits or rolls back the transaction depending on the outcome.
         """
         Model = self.get_model(entity_name)
@@ -528,7 +538,8 @@ class EntityController:
 
                 if response == "success":
                     self.app_view.display_success_message(
-                        f"{translate_entity[entity_name]} supprimé avec succès.")
+                        f"{translate_entity[entity_name]} supprimé avec "
+                        f"succès.")
                 else:
                     self.app_view.display_error_message(response)
 
@@ -539,13 +550,14 @@ class EntityController:
 
     def show_details_entity(self, user, session, entity_name, **kwargs):
         """
-        Display a single entity instance along with its related entities (if any).
+        Display a single entity instance along with its related entities.
         Automatically detects relationships and calls appropriate view.
 
         Args:
             user (Collaborator): the connected user
             session (Session): SQLAlchemy session object.
-            entity_name (str): The name of the entity to show details (e.g., 'clients').
+            entity_name (str): The name of the entity to show details
+            (e.g., 'clients').
 
         """
         Model = self.get_model(entity_name)

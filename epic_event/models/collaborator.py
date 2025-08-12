@@ -1,4 +1,6 @@
-"""Collaborator ORM model with validation, error handling, and relationships."""
+"""
+Collaborator ORM model with validation, error handling, and relationships.
+"""
 import logging
 import re
 
@@ -57,7 +59,8 @@ class Collaborator(Base, Entity):
     @staticmethod
     def get_fields(role, purpose: str) -> list[list[str]]:
         """
-        Returns the list of a collaborator’s fields with their labels for display.
+        Returns the list of a collaborator’s fields with their labels for
+        display.
 
         Each item is a list composed of two strings:
             - the technical name of the field used in the ORM model,
@@ -150,8 +153,8 @@ class Collaborator(Base, Entity):
         return full_name, None
 
     @staticmethod
-    def validate_email(db: Session, email: str) -> tuple[None, str] | tuple[
-        str, None]:
+    def validate_email(db: Session, email: str) -> (
+            tuple[None, str] | tuple[str, None]):
         """
         Validate the type and the format of an email.
 

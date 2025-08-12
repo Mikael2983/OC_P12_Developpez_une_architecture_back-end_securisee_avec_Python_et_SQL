@@ -23,8 +23,10 @@ Usage:
 
 Notes:
     - Existing records are checked to avoid duplication.
-    - `flush()` is used where necessary to populate relationships before inserts.
-    - Passwords are hashed using `validate_password()` method of the `Collaborator` model.
+    - `flush()` is used where necessary to populate relationships before
+    inserts.
+    - Passwords are hashed using `validate_password()` method of the
+        `Collaborator` model.
 
 Warning:
     These functions should not be used in production environments unless

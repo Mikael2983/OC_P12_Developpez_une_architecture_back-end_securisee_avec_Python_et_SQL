@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 
 from epic_event.settings import (TITLE_STYLE, REQUEST_STYLE,
-                                 TEXT_STYLE, SUCCESS_STYLE)
+                                 TEXT_STYLE)
 
 
 class CollaboratorView:
@@ -101,5 +101,3 @@ class CollaboratorView:
                     collaborator.role,
                 )
         self.console.print(table)
-
-

@@ -212,8 +212,8 @@ class Client(Base, Entity):
         return phone, None
 
     @staticmethod
-    def validate_company_name(company_name: str) -> tuple[None, str] | tuple[
-        str, None]:
+    def validate_company_name(company_name: str) -> (
+            tuple[None, str] | tuple[str, None]):
         """Validates the company name string.
         Args:
             company_name (str): The company name to validate.
