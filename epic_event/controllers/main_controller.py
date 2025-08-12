@@ -175,9 +175,15 @@ class MainController:
             )
             options = permissions[entity_name][role]
 
-            self.app_view.display_entity_menu_role(user.role, entity_name, options)
+            self.app_view.display_entity_menu_role(user.role, entity_name,
+                                                   options)
 
             choice = self.app_view.choose_option()
+
+            try:
+                int(choice)
+            except:
+                continue
 
             if int(choice) > len(options):
                 if user.role == "admin" and int(choice) == len(options) + 1:
